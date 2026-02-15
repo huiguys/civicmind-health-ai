@@ -1,8 +1,8 @@
-# Design Document: Universal Medical Translator
+# Design Document: CivicMind Health AI
 
 ## Overview
 
-The Universal Medical Translator is a mobile-first healthcare feature that bridges the language gap between English ABHA medical reports and patients who speak local Indian languages. The system retrieves medical reports from India's ABHA network, translates them using AI-powered translation services, and presents them with contextual medical explanations in the patient's preferred language.
+CivicMind Health AI is a mobile-first healthcare feature that bridges the language gap between English ABHA medical reports and patients who speak local Indian languages. The system retrieves medical reports from India's ABHA network, translates them using AI-powered translation services, and presents them with contextual medical explanations in the patient's preferred language.
 
 The architecture follows a serverless pattern using AWS Lambda for backend processing, API Gateway for REST endpoints, and DynamoDB for data persistence. The React Native frontend provides a cross-platform mobile experience with offline capabilities.
 
@@ -826,7 +826,7 @@ Together, these provide comprehensive coverage where unit tests catch concrete b
 **Configuration**:
 - Each property test must run a minimum of 100 iterations
 - Each test must reference its design document property using a comment tag
-- Tag format: `// Feature: universal-medical-translator, Property {number}: {property_text}`
+- Tag format: `// Feature: civicmind-health-ai, Property {number}: {property_text}`
 
 **Example Property Test Structure**:
 
@@ -835,7 +835,7 @@ import fc from 'fast-check';
 
 describe('Medical Term Preservation', () => {
   it('should preserve medical terms in translation', () => {
-    // Feature: universal-medical-translator, Property 7: Medical Term Preservation Format
+    // Feature: civicmind-health-ai, Property 7: Medical Term Preservation Format
     
     fc.assert(
       fc.property(
@@ -860,7 +860,7 @@ describe('Medical Term Preservation', () => {
   });
   
   it('should apply empathy filter for critical diagnoses', () => {
-    // Feature: universal-medical-translator, Property 6b: Empathy Filter Application
+    // Feature: civicmind-health-ai, Property 6b: Empathy Filter Application
     
     fc.assert(
       fc.property(
