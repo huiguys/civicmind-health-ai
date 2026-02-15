@@ -62,7 +62,7 @@ This repository contains the enterprise-grade technical specifications, requirem
 
 ## 👨‍💻 Team CivicMind
 Built with ❤️ for the AWS AI for Bharat Hackathon.
-* **Srinivasa P M** (Team Leader)
+* **Srinivasa P M** 
 * **Spandana H N**
 * **Ria Goyal**
 * **Nidith V S**
