@@ -1,9 +1,9 @@
-CivicMind – AI Health Companion for Bharat
+**CivicMind – AI Health Companion for Bharat**
 
 CivicMind is an AI-powered health intelligence platform built on top of India’s ABHA (Ayushman Bharat Health Account) ecosystem.
 It actively translates, understands, and analyzes medical data to empower patients and reduce doctors’ administrative workload, especially across Tier 2 and Tier 3 India.
 
-Problem Statement
+**Problem Statement**
 
 Patients:
 Medical reports are complex and written in English
@@ -15,7 +15,7 @@ High administrative burden due to manual data entry
 Fragmented access to patient medical history
 Less time for patient care
 
-Our Solution:
+**Our Solution:**
 
 CivicMind introduces an Active AI Intelligence Layer on top of ABHA.
 Unlike traditional health apps that only store PDFs, CivicMind:
@@ -24,7 +24,7 @@ Unlike traditional health apps that only store PDFs, CivicMind:
 3.Analyzes new inputs (voice, prescriptions, food images)
 4.Provides real-time, actionable insights
 
-Core Technologies
+**Core Technologies**
 
 Generative AI: Amazon Bedrock (Claude 3)
 Medical NLP: Amazon Comprehend Medical
