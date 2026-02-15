@@ -1,8 +1,8 @@
-# Requirements Document: Universal Medical Translator
+# Requirements Document: CivicMind Health AI
 
 ## Introduction
 
-The Universal Medical Translator enables patients to understand their medical reports by translating English ABHA (Ayushman Bharat Health Account) reports into their preferred local Indian language with appropriate medical context and explanations. This feature bridges the language gap in healthcare, making medical information accessible to patients who may not be proficient in English.
+CivicMind Health AI enables patients to understand their medical reports by translating English ABHA (Ayushman Bharat Health Account) reports into their preferred local Indian language with appropriate medical context and explanations.
 
 ## Glossary
 
@@ -50,6 +50,7 @@ The Universal Medical Translator enables patients to understand their medical re
 3. WHEN translating medical terms, THE Translation_Service SHALL maintain both the translated term and the original English term in parentheses
 4. THE Translation_Service SHALL complete translation within 10 seconds for reports up to 5000 words
 5. IF translation fails, THEN THE System SHALL display the original English report with an error notification
+6. IF the medical report contains critical, severe, or terminal diagnoses, THEN THE Translation_Service SHALL apply an Empathy Filter to soften the clinical tone and explicitly advise the patient to consult their doctor, preventing unnecessary panic
 
 ### Requirement 4: Medical Context and Explanations
 
