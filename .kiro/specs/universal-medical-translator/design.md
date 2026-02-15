@@ -9,10 +9,11 @@ The architecture follows a serverless pattern using AWS Lambda for backend proce
 ### Key Design Decisions
 
 1. **Serverless Architecture**: Using AWS Lambda enables automatic scaling for varying load patterns typical of healthcare applications
-2. **Medical-Specific Translation**: Leveraging AWS Translate with custom medical terminology ensures accuracy
-3. **Hybrid Translation Approach**: Combining machine translation with medical term preservation maintains clinical accuracy
-4. **Offline-First for Saved Reports**: Local storage enables access to previously viewed reports without connectivity
-5. **Temporary Server Storage**: 24-hour TTL on DynamoDB items balances functionality with privacy requirements
+2. **AI-Powered Medical Translation**: Leveraging Amazon Bedrock (Claude 3) for context-aware medical translation with empathy filtering ensures both accuracy and appropriate tone
+3. **OCR for Legacy Documents**: Using AWS Textract to extract text from PDF medical reports before translation
+4. **Hybrid Translation Approach**: Combining LLM-based translation with medical term preservation maintains clinical accuracy
+5. **Offline-First for Saved Reports**: Local storage enables access to previously viewed reports without connectivity
+6. **Temporary Server Storage**: 24-hour TTL on DynamoDB items balances functionality with privacy requirements
 
 ## Architecture
 
@@ -53,9 +54,18 @@ The architecture follows a serverless pattern using AWS Lambda for backend proce
          │                    │                    │
          ▼                    ▼                    ▼
 ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│ ABHA Network │    │ AWS Translate│    │  DynamoDB    │
-│   (External) │    │   Service    │    │  (Reports)   │
+│ ABHA Network │    │ AWS Textract │    │  DynamoDB    │
+│   (External) │    │     (OCR)    │    │  (Reports)   │
 └──────────────┘    └──────────────┘    └──────────────┘
+                            │
+                            ▼
+                   ┌──────────────┐
+                   │Amazon Bedrock│
+                   │  (Claude 3)  │
+                   │  Translation │
+                   │   + Empathy  │
+                   │    Filter    │
+                   └──────────────┘
 ```
 
 ### Data Flow
@@ -71,8 +81,12 @@ The architecture follows a serverless pattern using AWS Lambda for backend proce
    - Patient selects report and target language
    - Frontend calls `/api/reports/translate` endpoint
    - Translation Service Handler retrieves report from DynamoDB
+   - **If report is PDF format**: AWS Textract extracts raw text via OCR
    - Medical terms extracted and preserved
-   - Content translated using AWS Translate with custom medical terminology
+   - Content sent to Amazon Bedrock (Claude 3) with system prompt for:
+     - Medical translation to target language
+     - Empathy filtering for critical/severe diagnoses
+     - Medical term preservation in format: "translated_term (original_term)"
    - Translated report with preserved terms returned to frontend
 
 3. **Medical Context Flow**:
@@ -260,12 +274,16 @@ async function handleRetrieveReports(
 #### TranslationServiceHandler
 
 ```typescript
-interface TranslationService {
-  translateText(
+interface TextractService {
+  extractText(pdfBuffer: Buffer): Promise<string>;
+  extractStructuredData(pdfBuffer: Buffer): Promise<StructuredDocument>;
+}
+
+interface BedrockTranslationService {
+  translateWithClaude(
     text: string,
-    sourceLang: string,
     targetLang: string,
-    customTerminology?: string
+    systemPrompt: string
   ): Promise<string>;
 }
 
@@ -279,12 +297,110 @@ async function handleTranslateReport(
   request: TranslateReportRequest
 ): Promise<TranslateReportResponse> {
   // 1. Retrieve report from DynamoDB
-  // 2. Extract medical terms
-  // 3. Replace terms with placeholders
-  // 4. Translate text using AWS Translate
-  // 5. Restore medical terms with translations
-  // 6. Parse and structure translated report
-  // 7. Return translated report
+  const report = await retrieveReportFromDB(request.reportId);
+  
+  // 2. If PDF format, extract text using AWS Textract
+  let reportText = report.content;
+  if (report.format === 'pdf') {
+    reportText = await textractService.extractText(report.contentBuffer);
+  }
+  
+  // 3. Extract medical terms
+  const medicalTerms = termExtractor.extractTerms(reportText);
+  
+  // 4. Detect critical/severe diagnoses for empathy filtering
+  const hasCriticalDiagnosis = detectCriticalContent(reportText, medicalTerms);
+  
+  // 5. Build system prompt for Bedrock
+  const systemPrompt = buildMedicalTranslationPrompt(
+    request.targetLanguage,
+    medicalTerms,
+    hasCriticalDiagnosis
+  );
+  
+  // 6. Translate using Amazon Bedrock (Claude 3)
+  const translatedText = await bedrockService.translateWithClaude(
+    reportText,
+    request.targetLanguage,
+    systemPrompt
+  );
+  
+  // 7. Parse and structure translated report
+  const structuredReport = parseTranslatedReport(translatedText, medicalTerms);
+  
+  // 8. Return translated report
+  return {
+    translatedReport: structuredReport,
+    translationTime: Date.now() - startTime
+  };
+}
+
+// System Prompt Builder for Amazon Bedrock (Claude 3)
+function buildMedicalTranslationPrompt(
+  targetLanguage: string,
+  medicalTerms: MedicalTerm[],
+  hasCriticalDiagnosis: boolean
+): string {
+  const languageNames = {
+    'hi': 'Hindi',
+    'ta': 'Tamil',
+    'te': 'Telugu',
+    'bn': 'Bengali',
+    'mr': 'Marathi',
+    'gu': 'Gujarati',
+    'kn': 'Kannada',
+    'ml': 'Malayalam',
+    'pa': 'Punjabi',
+    'or': 'Odia'
+  };
+
+  const basePrompt = `You are a medical translation expert specializing in translating English medical reports into ${languageNames[targetLanguage]}.
+
+Your task is to translate the medical report while following these critical rules:
+
+1. MEDICAL TERM PRESERVATION:
+   - For all medical terms, medications, conditions, and measurements, use this format: "translated_term (original_term)"
+   - Examples: "उच्च रक्तचाप (hypertension)", "क्रिएटिनिन (creatinine)"
+   - Keep all numerical values and units EXACTLY as they appear in the original
+   - Preserve medical abbreviations in parentheses after translation
+
+2. ACCURACY:
+   - Maintain the clinical meaning precisely
+   - Do not omit any medical information
+   - Preserve the structure of the report (sections, headings, tables)
+   - Keep patient information fields in their original format
+
+3. CLARITY:
+   - Use simple, clear language that patients can understand
+   - Avoid overly technical phrasing when a simpler translation exists
+   - Maintain professional medical tone`;
+
+  const empathyFilterAddition = hasCriticalDiagnosis ? `
+
+4. EMPATHY FILTER (CRITICAL):
+   - This report contains critical, severe, or terminal diagnoses
+   - Soften the clinical tone to reduce panic and anxiety
+   - Use compassionate, supportive language
+   - After presenting any critical diagnosis, ALWAYS add: "कृपया अपने डॉक्टर से परामर्श करें और उनके मार्गदर्शन का पालन करें।" (Please consult your doctor and follow their guidance.)
+   - Frame information in a way that encourages medical consultation rather than self-diagnosis
+   - Example: Instead of "Patient has terminal cancer", use "रिपोर्ट में गंभीर स्थिति का संकेत है। कृपया तुरंत अपने डॉक्टर से विस्तृत चर्चा करें।" (The report indicates a serious condition. Please discuss in detail with your doctor immediately.)` : '';
+
+  return basePrompt + empathyFilterAddition + `
+
+Now translate the following medical report to ${languageNames[targetLanguage]}:`;
+}
+
+// Critical content detection
+function detectCriticalContent(text: string, terms: MedicalTerm[]): boolean {
+  const criticalKeywords = [
+    'cancer', 'carcinoma', 'malignant', 'tumor', 'metastasis',
+    'terminal', 'critical', 'severe', 'life-threatening',
+    'heart failure', 'kidney failure', 'liver failure',
+    'stroke', 'myocardial infarction', 'sepsis'
+  ];
+  
+  const lowerText = text.toLowerCase();
+  return criticalKeywords.some(keyword => lowerText.includes(keyword));
 }
 ```
 
@@ -388,22 +504,34 @@ const STORAGE_KEYS = {
 };
 ```
 
-### Medical Term Extraction Pattern
+### Medical Term Extraction and Translation Pattern
 
-The system uses a hybrid approach for medical term handling:
+The system uses an AI-powered approach with Amazon Bedrock (Claude 3) for medical term handling:
 
-1. **Pre-translation**: Extract medical terms using pattern matching and medical dictionaries
-2. **Placeholder Insertion**: Replace terms with unique placeholders (e.g., `__TERM_001__`)
-3. **Translation**: Translate text with placeholders using AWS Translate
-4. **Term Restoration**: Replace placeholders with format: `translated_term (original_term)`
+1. **OCR Extraction (for PDFs)**: AWS Textract extracts raw text from legacy PDF medical reports
+2. **Medical Term Identification**: Extract medical terms using pattern matching and medical dictionaries
+3. **Critical Content Detection**: Analyze report for critical/severe diagnoses to trigger empathy filtering
+4. **Bedrock Translation**: Send text to Claude 3 with specialized system prompt that:
+   - Translates medical content to target language
+   - Preserves medical terms in format: `translated_term (original_term)`
+   - Applies empathy filter for critical diagnoses
+   - Maintains clinical accuracy and report structure
 
 Example:
 ```
-Original: "Patient has hypertension with elevated creatinine levels."
-Extracted: ["hypertension", "creatinine"]
-Pre-translation: "Patient has __TERM_001__ with elevated __TERM_002__ levels."
-Translated (Hindi): "रोगी को __TERM_001__ है और __TERM_002__ का स्तर बढ़ा हुआ है।"
-Final: "रोगी को उच्च रक्तचाप (hypertension) है और क्रिएटिनिन (creatinine) का स्तर बढ़ा हुआ है।"
+Original PDF: [Binary PDF content from ABHA]
+After Textract: "Patient has hypertension with elevated creatinine levels."
+Extracted Terms: ["hypertension", "creatinine"]
+Critical Detection: false (no critical diagnosis)
+Bedrock Translation (Hindi): "रोगी को उच्च रक्तचाप (hypertension) है और क्रिएटिनिन (creatinine) का स्तर बढ़ा हुआ है।"
+```
+
+Example with Empathy Filter:
+```
+Original: "Patient diagnosed with stage IV metastatic carcinoma."
+Critical Detection: true (contains "metastatic carcinoma")
+Bedrock Translation (Hindi): "रिपोर्ट में गंभीर स्थिति का संकेत है जिसमें कैंसर (carcinoma) की उन्नत अवस्था शामिल है। कृपया तुरंत अपने डॉक्टर से विस्तृत चर्चा करें और उनके मार्गदर्शन का पालन करें।"
+(Translation: "The report indicates a serious condition involving advanced stage cancer (carcinoma). Please discuss in detail with your doctor immediately and follow their guidance.")
 ```
 
 
@@ -443,9 +571,21 @@ A property is a characteristic or behavior that should hold true across all vali
 
 ### Property 6: Translation Produces Output
 
-*For any* valid medical report and supported target language, requesting translation should return a translated report with content in the target language.
+*For any* valid medical report and supported target language, requesting translation should return a translated report with content in the target language using Amazon Bedrock (Claude 3).
 
 **Validates: Requirements 3.1**
+
+### Property 6a: PDF OCR Extraction
+
+*For any* medical report in PDF format, AWS Textract should successfully extract text content before translation processing.
+
+**Validates: Requirements 3.1**
+
+### Property 6b: Empathy Filter Application
+
+*For any* medical report containing critical, severe, or terminal diagnoses, the translated output should include compassionate language and explicit advice to consult a doctor.
+
+**Validates: Requirements 3.6**
 
 ### Property 7: Medical Term Preservation Format
 
@@ -554,7 +694,8 @@ A property is a characteristic or behavior that should hold true across all vali
 
 3. **Translation Errors**
    - Unsupported language
-   - Translation service failure
+   - Bedrock service timeout or throttling
+   - Textract OCR failure on malformed PDFs
    - Malformed report content
 
 4. **Storage Errors**
@@ -651,17 +792,21 @@ interface PerformanceMetric {
 ```
 
 **CloudWatch Metrics**:
-- Translation request count and latency
+- Translation request count and latency (Bedrock API calls)
+- Textract OCR success/failure rates
 - ABHA retrieval success/failure rates
 - Cache hit/miss ratios
 - Storage usage per user
 - API error rates by endpoint
+- Bedrock token usage and costs
 
 **Alarms**:
 - Translation latency > 10 seconds
+- Textract OCR failure rate > 5%
 - ABHA retrieval failure rate > 10%
 - Lambda error rate > 5%
 - DynamoDB throttling events
+- Bedrock throttling or quota exceeded
 
 ## Testing Strategy
 
@@ -700,7 +845,7 @@ describe('Medical Term Preservation', () => {
           targetLanguage: fc.constantFrom('hi', 'ta', 'te', 'bn')
         }),
         async (report) => {
-          const translated = await translateReport(report);
+          const translated = await translateReportWithBedrock(report);
           
           // Verify each medical term appears in format: "translated (original)"
           for (const term of report.medicalTerms) {
@@ -713,6 +858,31 @@ describe('Medical Term Preservation', () => {
       { numRuns: 100 }
     );
   });
+  
+  it('should apply empathy filter for critical diagnoses', () => {
+    // Feature: universal-medical-translator, Property 6b: Empathy Filter Application
+    
+    fc.assert(
+      fc.property(
+        fc.record({
+          content: fc.constantFrom(
+            'Patient has terminal cancer',
+            'Diagnosed with severe heart failure',
+            'Critical condition with metastatic carcinoma'
+          ),
+          targetLanguage: fc.constantFrom('hi', 'ta', 'te')
+        }),
+        async (report) => {
+          const translated = await translateReportWithBedrock(report);
+          
+          // Verify empathy filter was applied
+          expect(translated.content).toMatch(/consult.*doctor|डॉक्टर से परामर्श/i);
+          expect(translated.hasCriticalContent).toBe(true);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
 });
 ```
 
@@ -720,10 +890,12 @@ describe('Medical Term Preservation', () => {
 
 **Focus Areas**:
 1. **API Endpoint Integration**: Test request/response handling for each endpoint
-2. **Error Conditions**: Test specific error scenarios (network failures, invalid input)
-3. **Edge Cases**: Empty reports, very long reports, special characters
+2. **Error Conditions**: Test specific error scenarios (network failures, invalid input, Textract failures, Bedrock timeouts)
+3. **Edge Cases**: Empty reports, very long reports, special characters, malformed PDFs
 4. **Authentication Flow**: Token validation, session management
 5. **Local Storage Operations**: Save, retrieve, delete operations
+6. **OCR Accuracy**: Test Textract extraction on various PDF formats
+7. **Empathy Filter**: Test critical diagnosis detection and appropriate response generation
 
 **Example Unit Test**:
 
@@ -744,15 +916,33 @@ describe('ABHA Report Retrieval', () => {
     expect(response.body.code).toBe('ABHA_UNAVAILABLE');
     expect(response.body.retryable).toBe(true);
   });
+  
+  it('should extract text from PDF using Textract', async () => {
+    const pdfBuffer = Buffer.from('mock-pdf-content');
+    mockTextractService.extractText.mockResolvedValue('Extracted medical report text');
+    
+    const result = await textractService.extractText(pdfBuffer);
+    
+    expect(result).toBe('Extracted medical report text');
+    expect(mockTextractService.extractText).toHaveBeenCalledWith(pdfBuffer);
+  });
+  
+  it('should detect critical diagnoses correctly', () => {
+    const criticalReport = 'Patient diagnosed with terminal cancer';
+    const normalReport = 'Patient has mild hypertension';
+    
+    expect(detectCriticalContent(criticalReport, [])).toBe(true);
+    expect(detectCriticalContent(normalReport, [])).toBe(false);
+  });
 });
 ```
 
 ### Test Coverage Goals
 
 - **Unit Test Coverage**: Minimum 80% code coverage
-- **Property Test Coverage**: All 21 correctness properties must have corresponding property tests
+- **Property Test Coverage**: All 23 correctness properties must have corresponding property tests (including new properties 6a and 6b)
 - **Integration Test Coverage**: All API endpoints must have integration tests
-- **E2E Test Coverage**: Critical user flows (retrieve → translate → view → save)
+- **E2E Test Coverage**: Critical user flows (retrieve → OCR → translate → view → save)
 
 ### Testing Environments
 
