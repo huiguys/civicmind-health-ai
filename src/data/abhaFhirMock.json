@@ -1,0 +1,48 @@
+{
+  "resourceType": "Bundle",
+  "id": "abha-bundle-rahul-101",
+  "type": "document",
+  "timestamp": "2026-02-28T14:30:00Z",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "14-9876-5432-1011",
+        "name": [{ "text": "Rahul Sharma" }],
+        "gender": "male",
+        "birthDate": "1990-05-15"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "code": { "text": "Blood Group" },
+        "valueString": "O+"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "clinicalStatus": { "text": "active" },
+        "code": { "text": "Penicillin" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": { "text": "active" },
+        "code": { "text": "Hypertension Grade 1" },
+        "subject": { "reference": "Patient/14-9876-5432-1011" },
+        "meta": { "security": [{ "code": "RESTRICTED", "display": "Requires OTP Consent" }] }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": { "text": "resolved" },
+        "code": { "text": "Peptic Ulcer (2023)" },
+        "meta": { "security": [{ "code": "RESTRICTED", "display": "Requires OTP Consent" }] }
+      }
+    }
+  ]
+}
