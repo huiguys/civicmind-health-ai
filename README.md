@@ -1,68 +1,157 @@
-# 🏥 CivicMind – AI Health Companion for Bharat
+# CivicMind Health AI Platform
 
-![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
-![React Native](https://img.shields.io/badge/react_native-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
-![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
-![AI For Bharat](https://img.shields.io/badge/Hackathon-AI_for_Bharat-blue?style=for-the-badge)
+Enterprise-grade healthcare platform powered by AWS Bedrock AI (Google Gemma 3).
 
-**CivicMind: We don’t just store health records; we understand them.** 🚀
+## 🏗️ Project Structure
 
-CivicMind is an AI-powered health intelligence platform built on top of India’s ABHA (Ayushman Bharat Health Account) ecosystem. It actively translates, understands, and analyzes medical data to empower patients and reduce doctors’ administrative workload, democratizing elite healthcare across Tier-2 and Tier-3 India.
+### Frontend (`src/`)
+```
+src/
+├── features/              # Feature-based modules
+│   ├── auth/             # Authentication
+│   │   └── AuthLogin.jsx
+│   ├── patient/          # Patient portal
+│   │   └── PatientDashboard.jsx
+│   └── doctor/           # Doctor portal
+│       ├── DoctorDashboard.jsx
+│       ├── PatientDetailView.jsx
+│       └── PrescriptionBuilder.jsx
+├── shared/               # Shared resources
+│   ├── context/         # React Context
+│   │   └── PatientContext.jsx
+│   ├── hooks/           # Custom hooks
+│   │   └── useSpeech.js
+│   └── utils/           # Utility functions
+│       └── formatMarkdown.js
+├── api/                 # API client layer
+│   └── healthApi.js
+├── config/              # Configuration
+│   └── constants.js
+├── data/                # Mock data
+│   ├── mockData.js
+│   └── abhaFhirMock.json
+├── App.jsx              # Main app component
+├── main.jsx             # Entry point
+└── index.css            # Global styles
+```
 
----
+### Backend (`backend-lambda/`)
+```
+backend-lambda/
+├── config/              # Configuration
+│   ├── aws.config.js   # AWS Bedrock config
+│   └── server.config.js # Server config
+├── controllers/         # Request handlers
+│   └── healthController.js
+├── middleware/          # Express middleware
+│   ├── errorHandler.js
+│   └── logger.js
+├── routes/              # API routes
+│   └── aiRoutes.js
+├── services/            # Business logic
+│   └── gemmaService.js
+├── index.js             # Lambda handler
+├── server.js            # Local dev server
+└── .env                 # Environment variables
+```
 
-## ⚠️ The Problem Statement
+## 🚀 Quick Start
 
-**For Patients:**
-* Medical reports are complex, jargon-heavy, and written entirely in English.
-* Language barriers cause confusion, unnecessary panic, and poor health decisions.
-* There is no personalized lifestyle guidance based on their actual clinical history.
+### Prerequisites
+- Node.js 18+
+- AWS Account with Bedrock access
+- AWS Access Keys
 
-**For Doctors:**
-* High administrative burden due to manual data entry and typing prescriptions.
-* Fragmented access to a patient's long-term medical history.
-* Less time focused on actual patient care.
+### Installation
 
----
+1. **Clone and install dependencies:**
+```bash
+npm install
+cd backend-lambda && npm install && cd ..
+```
 
-## 💡 Our Solution: An Active AI Intelligence Layer
-Unlike traditional health apps that only act as passive "PDF viewers" for ABHA records, CivicMind introduces an **Active AI Intelligence Layer**. CivicMind actively:
-1. **Reads & Understands** legacy medical records using OCR.
-2. **Translates** clinical jargon into simple, local languages.
-3. **Analyzes** new inputs in real-time (voice dictation, new prescriptions, food images).
-4. **Provides** actionable, medical-grade insights and safety guardrails.
+2. **Configure AWS credentials:**
+```bash
+cd backend-lambda
+cp .env.example .env
+# Edit .env with your AWS credentials
+```
 
-### 🌟 Core Features
-* **🗣️ Universal Medical Translator:** Reads English ABHA reports via AWS Textract and explains them in the patient's local language using Claude 3.
-* **🎙️ Voice-Based Auto-Update:** Doctors speak prescriptions, and AWS HealthScribe automatically converts it into a structured digital record.
-* **🛡️ The "Silent Guardian":** An active background safety check powered by Amazon Comprehend Medical that alerts doctors to dangerous drug interactions.
-* **🍎 Nutri-Scanner:** Medical-grade food and diet analysis based purely on the patient's unique clinical blood reports.
-* **💙 Empathy Filter:** GenAI dynamically softens the delivery of critical medical news to prevent patient panic and encourage professional consultation.
+3. **Start development servers:**
 
----
+Terminal 1 - Backend:
+```bash
+cd backend-lambda
+node server.js
+```
 
-## ⚙️ Core Technologies
-Built entirely on an enterprise-grade, serverless AWS architecture:
-* 🧠 **Generative AI:** Amazon Bedrock (Claude 3)
-* 🏥 **Medical NLP:** Amazon Comprehend Medical
-* 🎙️ **Voice-to-Text:** AWS HealthScribe
-* 📄 **Document OCR:** AWS Textract
-* ⚡ **Backend:** AWS Lambda (Serverless) & Node.js
-* 💾 **Database:** Amazon DynamoDB
-* 📱 **Frontend:** React Native
-* 🏛️ **Health APIs:** ABDM (ABHA) Sandbox APIs
+Terminal 2 - Frontend:
+```bash
+npm run dev
+```
 
----
+4. **Access the app:**
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3001
 
-## 🏗️ Architecture & Specifications
-This repository contains the enterprise-grade technical specifications, requirements (EARS format), and Mermaid.js architecture data flows generated for the AI for Bharat Hackathon.
-* Navigate to the `.kiro/specs/civicmind-health-ai/` folder to view the complete `design.md` and `requirements.md` files.
+## 🔑 Environment Variables
 
----
+Create `backend-lambda/.env`:
+```env
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION=us-east-1
+BEDROCK_MODEL_ID=google.gemma-3-27b-it
+PORT=3001
+CORS_ORIGIN=http://localhost:5173
+```
 
-## 👨‍💻 Team CivicMind
-Built with ❤️ for the AWS AI for Bharat Hackathon.
-* **Srinivasa P M** 
-* **Spandana H N**
-* **Ria Goyal**
-* **Nidith V S**
+## 📦 Key Features
+
+- **AI Health Summaries** - Personalized health insights
+- **Multi-language Support** - 6 Indian languages
+- **Voice Accessibility** - Text-to-speech
+- **Doctor Portal** - Patient management & AI diagnostics
+- **Patient Portal** - Health records & AI companion
+- **ABHA Integration** - Secure health data access
+
+## 🛠️ Tech Stack
+
+**Frontend:**
+- React 18
+- Vite
+- TailwindCSS
+- Context API
+
+**Backend:**
+- Node.js + Express
+- AWS Bedrock (Gemma 3 27B)
+- AWS Lambda compatible
+
+## 📝 API Endpoints
+
+### Patient APIs
+- `POST /api/patient-health-summary` - Generate health summary
+- `POST /api/chat` - Patient AI chat
+- `POST /api/translate-summary` - Translate to local language
+
+### Doctor APIs
+- `POST /api/doctor-chat` - Doctor AI assistant
+- `POST /api/generate-patient-overview` - Patient overview
+- `POST /api/check-prescription` - Prescription safety check
+
+## 🏢 Enterprise Architecture
+
+This codebase follows enterprise best practices:
+
+✅ **Feature-based organization** - Scalable module structure  
+✅ **Separation of concerns** - Clear layer boundaries  
+✅ **Configuration management** - Centralized config  
+✅ **Error handling** - Global error middleware  
+✅ **API abstraction** - Clean API client layer  
+✅ **Reusable utilities** - Shared hooks and utils  
+✅ **Type safety ready** - Easy TypeScript migration path  
+
+## 📄 License
+
+Proprietary - CivicMind Health AI Platform

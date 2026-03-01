@@ -1,47 +1,103 @@
 import { useState } from 'react'
-import AuthLogin from './components/AuthLogin'
-import DoctorDashboard from './components/DoctorDashboard'
-import PatientDashboard from './components/PatientDashboard'
+import AuthLogin from './features/auth/AuthLogin'
+import DoctorDashboard from './features/doctor/DoctorDashboard'
+import PatientDashboard from './features/patient/PatientDashboard'
 
 function LandingPage({ onSelectPortal }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4">
-      <div className="max-w-6xl w-full">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-800 mb-4">CivicMind Health AI</h1>
-          <p className="text-xl text-gray-600">Secure, Intelligent Healthcare Platform</p>
-        </div>
-        
-        <div className="grid md:grid-cols-2 gap-8">
-          <button
-            onClick={() => onSelectPortal('auth-doctor')}
-            className="bg-white rounded-2xl shadow-xl p-12 hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-transparent hover:border-blue-500"
-          >
-            <div className="flex flex-col items-center space-y-6">
-              <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <h2 className="text-3xl font-bold text-gray-800">Enter Doctor Portal</h2>
-              <p className="text-gray-600 text-center">Access patient records, AI diagnostics, and clinical tools</p>
-            </div>
-          </button>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 relative">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden opacity-20">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-white rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
 
-          <button
-            onClick={() => onSelectPortal('auth-patient')}
-            className="bg-white rounded-2xl shadow-xl p-12 hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-transparent hover:border-green-500"
-          >
-            <div className="flex flex-col items-center space-y-6">
-              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
-                <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
+      {/* Header */}
+      <div className="relative z-10 px-8 py-6">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-xl border-2 border-white/30">
+            <span className="text-3xl">🏥</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white drop-shadow-lg">CivicMind</h1>
+            <p className="text-sm text-blue-100">Health AI Platform</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 flex-1 flex items-center justify-center px-8">
+        <div className="max-w-7xl w-full">
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <h1 className="text-7xl font-bold text-white mb-6 drop-shadow-2xl leading-tight">
+              Welcome to<br />CivicMind Health AI
+            </h1>
+            <p className="text-2xl text-blue-100 font-light max-w-3xl mx-auto">
+              Your intelligent healthcare companion powered by AWS Bedrock AI.<br />
+              Secure, fast, and personalized medical insights at your fingertips.
+            </p>
+          </div>
+
+          {/* Portal Selection Cards */}
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <button
+              onClick={() => onSelectPortal('auth-doctor')}
+              className="group bg-white/10 backdrop-blur-xl rounded-3xl p-10 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border-2 border-white/20 hover:border-white/40 shadow-2xl"
+            >
+              <div className="flex flex-col items-center space-y-6">
+                <div className="w-28 h-28 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-3xl flex items-center justify-center shadow-2xl group-hover:shadow-3xl transition-all duration-300 transform group-hover:scale-110">
+                  <span className="text-6xl">👨‍⚕️</span>
+                </div>
+                <h2 className="text-4xl font-bold text-white">Doctor Portal</h2>
+                <p className="text-blue-100 text-center text-lg">
+                  Access patient records, AI diagnostics, and clinical decision support tools
+                </p>
+                <div className="flex items-center space-x-2 text-white font-semibold">
+                  <span>Enter Portal</span>
+                  <span className="transform group-hover:translate-x-2 transition-transform">→</span>
+                </div>
               </div>
-              <h2 className="text-3xl font-bold text-gray-800">Enter Patient Portal</h2>
-              <p className="text-gray-600 text-center">View health records, schedule appointments, and chat with AI</p>
-            </div>
-          </button>
+            </button>
+
+            <button
+              onClick={() => onSelectPortal('auth-patient')}
+              className="group bg-white/10 backdrop-blur-xl rounded-3xl p-10 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border-2 border-white/20 hover:border-white/40 shadow-2xl"
+            >
+              <div className="flex flex-col items-center space-y-6">
+                <div className="w-28 h-28 bg-gradient-to-br from-green-400 to-emerald-500 rounded-3xl flex items-center justify-center shadow-2xl group-hover:shadow-3xl transition-all duration-300 transform group-hover:scale-110">
+                  <span className="text-6xl">📱</span>
+                </div>
+                <h2 className="text-4xl font-bold text-white">Patient Portal</h2>
+                <p className="text-blue-100 text-center text-lg">
+                  View health records, chat with AI companion, and manage your wellness journey
+                </p>
+                <div className="flex items-center space-x-2 text-white font-semibold">
+                  <span>Enter Portal</span>
+                  <span className="transform group-hover:translate-x-2 transition-transform">→</span>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="relative z-10 px-8 py-6">
+        <div className="flex items-center justify-center space-x-8 text-white/80 text-sm">
+          <div className="flex items-center space-x-2">
+            <span>🔒</span>
+            <span>ABHA Secured</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span>🤖</span>
+            <span>AWS Bedrock AI</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span>⚡</span>
+            <span>Real-time Insights</span>
+          </div>
         </div>
       </div>
     </div>
@@ -52,19 +108,7 @@ function App() {
   const [currentView, setCurrentView] = useState('landing')
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-blue-600">CivicMind</h1>
-          <button
-            onClick={() => setCurrentView('landing')}
-            className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
-          >
-            Home
-          </button>
-        </div>
-      </nav>
-
+    <div className="min-h-screen">
       {currentView === 'landing' && <LandingPage onSelectPortal={setCurrentView} />}
       {currentView === 'auth-doctor' && (
         <AuthLogin 

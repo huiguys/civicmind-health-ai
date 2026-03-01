@@ -1,31 +1,86 @@
-const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
 const { PollyClient, SynthesizeSpeechCommand } = require("@aws-sdk/client-polly");
-const { TextractClient, DetectDocumentTextCommand } = require("@aws-sdk/client-textract");
+const {
+    handlePatientChat,
+    handleDoctorChat,
+    handleGenerateSummary,
+    handleGeneratePatientOverview,
+    handleTranslateReport,
+    handleCheckPrescription,
+    handlePatientHealthSummary,
+    handleAnalyzeImage,
+    handleTranslateSummary
+} = require('./routes/aiRoutes');
 
-// Initialize AWS Clients (Make sure your AWS credentials are set in your environment)
-const awsConfig = {
-    region: process.env.AWS_REGION || "us-east-1",
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-    }
-};
-const bedrock = new BedrockRuntimeClient({ region: "us-east-1" });
-const polly = new PollyClient({ region: "ap-south-1" }); // Mumbai region for Indian voices
-const textract = new TextractClient({ region: "ap-south-1" });
+// Initialize AWS Clients
+const polly = new PollyClient({ region: "ap-south-1" });
 
 exports.handler = async (event) => {
-    // Basic router for our API Gateway
     const path = event.rawPath || event.path;
     const body = event.body ? JSON.parse(event.body) : {};
 
+    const headers = { 
+        "Content-Type": "application/json", 
+        "Access-Control-Allow-Origin": "*" 
+    };
+
     try {
         // ==========================================
-        // ROUTE 1: MOCK ABHA GATEWAY (HIP)
+        // AI ROUTES
         // ==========================================
+        
+        if (path === '/api/chat') {
+            const result = await handlePatientChat(body);
+            return { ...result, headers };
+        }
+
+        if (path === '/api/doctor-chat') {
+            const result = await handleDoctorChat(body);
+            return { ...result, headers };
+        }
+
+        if (path === '/api/generate-patient-summary') {
+            const result = await handleGenerateSummary(body);
+            return { ...result, headers };
+        }
+
+        if (path === '/api/generate-patient-overview') {
+            const result = await handleGeneratePatientOverview(body);
+            return { ...result, headers };
+        }
+
+        if (path === '/api/patient-health-summary') {
+            const result = await handlePatientHealthSummary(body);
+            return { ...result, headers };
+        }
+
+        if (path === '/api/translate-report') {
+            const result = await handleTranslateReport(body);
+            return { ...result, headers };
+        }
+
+        if (path === '/api/check-prescription') {
+            const result = await handleCheckPrescription(body);
+            return { ...result, headers };
+        }
+
+        if (path === '/api/analyze-image') {
+            const result = await handleAnalyzeImage(body);
+            return { ...result, headers };
+        }
+
+        if (path === '/api/translate-summary') {
+            const result = await handleTranslateSummary(body);
+            return { ...result, headers };
+        }
+
+        // ==========================================
+        // MOCK ABHA GATEWAY
+        // ==========================================
+        
         if (path === '/api/get-abha-record') {
             return {
                 statusCode: 200,
+                headers,
                 body: JSON.stringify({
                     status: "success",
                     abhaId: body.abhaId,
@@ -38,42 +93,11 @@ exports.handler = async (event) => {
         }
 
         // ==========================================
-        // ROUTE 2: EMPATHY FILTER (BEDROCK / CLAUDE 3)
+        // VOICE ACCESSIBILITY (AMAZON POLLY)
         // ==========================================
-        if (path === '/api/translate-report') {
-            const { clinicalText, targetLanguage } = body;
-            
-            const prompt = `You are a compassionate medical AI. The patient's clinical report says: "${clinicalText}". 
-            Translate this into simple, empathetic ${targetLanguage}. Remove scary jargon. Remind them it is treatable and to consult their doctor.`;
-
-            const bedrockParams = {
-                modelId: "us.anthropic.claude-haiku-4-5-20251001-v1:0",
-                contentType: "application/json",
-                accept: "application/json",
-                body: JSON.stringify({
-                    anthropic_version: "bedrock-2023-05-31",
-                    max_tokens: 500,
-                    messages: [{ role: "user", content: prompt }]
-                })
-            };
-
-            const command = new InvokeModelCommand(bedrockParams);
-            const response = await bedrock.send(command);
-            const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-
-            return {
-                statusCode: 200,
-                body: JSON.stringify({ translation: responseBody.content[0].text })
-            };
-        }
-
-        // ==========================================
-        // ROUTE 3: VOICE ACCESSIBILITY (AMAZON POLLY)
-        // ==========================================
+        
         if (path === '/api/generate-audio') {
             const { text, language } = body;
-            
-            // Use 'Aditi' for Hindi/Indian English, 'Joanna' for standard English
             const voiceId = language === 'hindi' ? 'Aditi' : 'Joanna';
 
             const pollyParams = {
@@ -86,7 +110,6 @@ exports.handler = async (event) => {
             const command = new SynthesizeSpeechCommand(pollyParams);
             const response = await polly.send(command);
 
-            // Convert audio stream to base64 so frontend can play it easily
             const audioChunks = [];
             for await (const chunk of response.AudioStream) {
                 audioChunks.push(chunk);
@@ -95,54 +118,93 @@ exports.handler = async (event) => {
 
             return {
                 statusCode: 200,
+                headers,
                 body: JSON.stringify({ audioBase64: `data:audio/mp3;base64,${audioBase64}` })
             };
         }
 
         // ==========================================
-        // ROUTE 4: NUTRI-SCANNER (CLAUDE 3 VISION)
+        // FOOD SCANNER (DISABLED - Gemma doesn't support vision)
         // ==========================================
+        
         if (path === '/api/analyze-food') {
-            const { imageBase64, patientHistory } = body;
-            
-            const prompt = `You are a medical diet analyzer. The patient's history shows: ${patientHistory}. 
-            Look at this food image. Identify the food. If it is dangerous for their specific condition, issue a RED ALERT, explain why, and suggest a healthy Indian alternative.`;
-
-            const bedrockParams = {
-                modelId: "us.anthropic.claude-sonnet-4-6",
-                contentType: "application/json",
-                accept: "application/json",
-                body: JSON.stringify({
-                    anthropic_version: "bedrock-2023-05-31",
-                    max_tokens: 500,
-                    messages: [{
-                        role: "user",
-                        content: [
-                            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: imageBase64 } },
-                            { type: "text", text: prompt }
-                        ]
-                    }]
-                })
-            };
-
-            const command = new InvokeModelCommand(bedrockParams);
-            const response = await bedrock.send(command);
-            const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-
             return {
                 statusCode: 200,
-                body: JSON.stringify({ analysis: responseBody.content[0].text })
+                headers,
+                body: JSON.stringify({ 
+                    analysis: "🔧 Food scanner temporarily unavailable. This feature requires vision-capable AI models. Please consult your doctor about dietary restrictions based on your conditions." 
+                })
             };
         }
 
         // ==========================================
-        // ROUTE 5: AUTO-SYNC LIMS (AWS TEXTRACT)
+        // OTP VERIFICATION
         // ==========================================
-        if (path === '/api/webhook/lab-result-ready') {
-            // In a real scenario, this gets a PDF from an S3 bucket uploaded by the hospital
-            // We simulate the Textract call here for the demo
+        
+        if (path === '/api/verify-sensitive-access') {
+            const { otp } = body;
+            
+            if (otp && otp.length === 6) {
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify({
+                        status: "success",
+                        message: "Sensitive records access granted",
+                        accessGranted: true,
+                        expiresIn: 300
+                    })
+                };
+            }
+            
+            return {
+                statusCode: 401,
+                headers,
+                body: JSON.stringify({
+                    status: "error",
+                    message: "Invalid OTP",
+                    accessGranted: false
+                })
+            };
+        }
+
+        // ==========================================
+        // DOCTOR OVERRIDE
+        // ==========================================
+        
+        if (path === '/api/override-prescription') {
+            const { consentObtained } = body;
+            
+            if (!consentObtained) {
+                return {
+                    statusCode: 400,
+                    headers,
+                    body: JSON.stringify({
+                        status: "error",
+                        message: "Patient consent required for override"
+                    })
+                };
+            }
+            
             return {
                 statusCode: 200,
+                headers,
+                body: JSON.stringify({
+                    status: "success",
+                    message: "Prescription approved with doctor override",
+                    overrideId: `OVR-${Date.now()}`
+                })
+            };
+        }
+
+        // ==========================================
+        // LAB SYNC WEBHOOK
+        // ==========================================
+        
+        if (path === '/api/webhook/lab-result-ready') {
+            return {
+                statusCode: 200,
+                headers,
                 body: JSON.stringify({
                     message: "Lab Result Intercepted successfully.",
                     textractStatus: "Digitized",
@@ -153,12 +215,17 @@ exports.handler = async (event) => {
         }
 
         // Fallback for unknown routes
-        return { statusCode: 404, body: "Route not found in CivicMind API." };
+        return { 
+            statusCode: 404, 
+            headers,
+            body: JSON.stringify({ error: "Route not found" })
+        };
 
     } catch (error) {
-        console.error("CivicMind API Error:", error);
+        console.error("API Error:", error);
         return {
             statusCode: 500,
+            headers,
             body: JSON.stringify({ error: "Internal Server Error", details: error.message })
         };
     }

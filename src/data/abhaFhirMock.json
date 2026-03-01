@@ -1,48 +1,591 @@
 {
-  "resourceType": "Bundle",
-  "id": "abha-bundle-rahul-101",
-  "type": "document",
-  "timestamp": "2026-02-28T14:30:00Z",
-  "entry": [
-    {
-      "resource": {
-        "resourceType": "Patient",
-        "id": "14-9876-5432-1011",
-        "name": [{ "text": "Rahul Sharma" }],
-        "gender": "male",
-        "birthDate": "1990-05-15"
-      }
+  "14-1234-5678-9012": {
+    "patientId": "14-1234-5678-9012",
+    "name": "Rahul Sharma",
+    "age": 45,
+    "gender": "Male",
+    "bloodGroup": "O+",
+    "phone": "+91-9876543210",
+    "address": "123 MG Road, Bangalore, Karnataka 560001",
+    "allergies": ["Penicillin", "Sulfa Drugs"],
+    "conditions": ["Type 2 Diabetes Mellitus", "Hypertension Grade 2", "Dyslipidemia"],
+    "medications": [
+      "Metformin 500mg - Twice daily",
+      "Amlodipine 5mg - Once daily",
+      "Atorvastatin 10mg - Once daily at night"
+    ],
+    "emergencyContact": {
+      "name": "Sunita Sharma",
+      "relation": "Wife",
+      "phone": "+91-9876543211"
     },
-    {
-      "resource": {
-        "resourceType": "Observation",
-        "code": { "text": "Blood Group" },
-        "valueString": "O+"
+    "reports": [
+      {
+        "reportId": "RPT-2024-001",
+        "date": "2024-02-28",
+        "type": "Lab Report",
+        "department": "Pathology",
+        "provider": "Apollo Diagnostics, Bangalore",
+        "summary": "Comprehensive Metabolic Panel and Lipid Profile",
+        "fhirData": {
+          "resourceType": "DiagnosticReport",
+          "status": "final",
+          "category": "Laboratory",
+          "code": {
+            "coding": [{
+              "system": "http://loinc.org",
+              "code": "24331-1",
+              "display": "Lipid Panel"
+            }]
+          },
+          "result": [
+            {
+              "testName": "HbA1c",
+              "value": 7.8,
+              "unit": "%",
+              "normalRange": "4.0-5.6",
+              "status": "high",
+              "interpretation": "Poor glycemic control. Target <7.0% for diabetics."
+            },
+            {
+              "testName": "Fasting Blood Glucose",
+              "value": 156,
+              "unit": "mg/dL",
+              "normalRange": "70-100",
+              "status": "high",
+              "interpretation": "Elevated fasting glucose indicates inadequate diabetes management."
+            },
+            {
+              "testName": "Total Cholesterol",
+              "value": 245,
+              "unit": "mg/dL",
+              "normalRange": "<200",
+              "status": "high",
+              "interpretation": "Borderline high cholesterol increases cardiovascular risk."
+            },
+            {
+              "testName": "LDL Cholesterol",
+              "value": 165,
+              "unit": "mg/dL",
+              "normalRange": "<100",
+              "status": "high",
+              "interpretation": "High LDL cholesterol. Dietary modification and medication compliance essential."
+            },
+            {
+              "testName": "HDL Cholesterol",
+              "value": 38,
+              "unit": "mg/dL",
+              "normalRange": ">40",
+              "status": "low",
+              "interpretation": "Low HDL cholesterol reduces cardiovascular protection."
+            },
+            {
+              "testName": "Triglycerides",
+              "value": 210,
+              "unit": "mg/dL",
+              "normalRange": "<150",
+              "status": "high",
+              "interpretation": "Elevated triglycerides associated with metabolic syndrome."
+            },
+            {
+              "testName": "Serum Creatinine",
+              "value": 1.2,
+              "unit": "mg/dL",
+              "normalRange": "0.7-1.3",
+              "status": "normal",
+              "interpretation": "Kidney function within normal limits."
+            }
+          ]
+        },
+        "doctorNotes": "Patient shows suboptimal diabetes control with HbA1c at 7.8%. Lipid profile concerning with elevated LDL and triglycerides. Recommend: 1) Increase Metformin to 1000mg twice daily, 2) Strict dietary control - avoid refined carbs, fried foods, 3) Regular exercise 30 min daily, 4) Follow-up in 3 months."
+      },
+      {
+        "reportId": "RPT-2024-002",
+        "date": "2024-01-15",
+        "type": "Diagnostic Report",
+        "department": "Cardiology",
+        "provider": "Fortis Hospital, Bangalore",
+        "summary": "2D Echocardiography and ECG",
+        "fhirData": {
+          "resourceType": "DiagnosticReport",
+          "status": "final",
+          "category": "Imaging",
+          "code": {
+            "coding": [{
+              "system": "http://loinc.org",
+              "code": "34552-0",
+              "display": "Echocardiography"
+            }]
+          },
+          "findings": {
+            "bloodPressure": "145/95 mmHg",
+            "heartRate": "78 bpm",
+            "ejectionFraction": "58%",
+            "leftVentricle": "Normal size and function",
+            "valves": "No significant abnormalities",
+            "pericardium": "Normal"
+          }
+        },
+        "doctorNotes": "Blood pressure elevated at 145/95 mmHg despite medication. Echocardiogram shows preserved ejection fraction (58%) with no structural abnormalities. ECG shows normal sinus rhythm. Diagnosis: Uncontrolled Stage 2 Hypertension. Recommendation: Increase Amlodipine to 10mg daily, reduce sodium intake to <2g/day, monitor BP at home twice daily."
+      },
+      {
+        "reportId": "RPT-2023-003",
+        "date": "2023-11-02",
+        "type": "Consultation Report",
+        "department": "Endocrinology",
+        "provider": "Manipal Hospital, Bangalore",
+        "summary": "Diabetes Management Review",
+        "fhirData": {
+          "resourceType": "Encounter",
+          "status": "finished",
+          "class": "outpatient",
+          "reasonCode": "Type 2 Diabetes Mellitus follow-up"
+        },
+        "doctorNotes": "Patient reports poor dietary compliance, frequent consumption of sweets and fried snacks. HbA1c trending upward from 7.2% (6 months ago) to current 7.8%. Fasting glucose consistently >140 mg/dL. Patient counseled on: 1) Strict avoidance of refined sugars, white rice, maida products, 2) Portion control, 3) Include more vegetables, whole grains, 4) Regular physical activity. Prescribed continuous glucose monitoring for 2 weeks to identify patterns."
       }
+    ],
+    "sensitiveReports": [
+      {
+        "reportId": "RPT-SENS-2023-001",
+        "date": "2023-09-15",
+        "type": "Psychiatric Evaluation",
+        "department": "Psychiatry",
+        "provider": "NIMHANS, Bangalore",
+        "requiresSecondOTP": true,
+        "summary": "Mental Health Assessment",
+        "fhirData": {
+          "resourceType": "Encounter",
+          "status": "finished",
+          "class": "outpatient",
+          "reasonCode": "Anxiety Disorder, Generalized"
+        },
+        "doctorNotes": "Patient presents with persistent worry, sleep disturbances, and difficulty concentrating for past 6 months. Diagnosed with Generalized Anxiety Disorder (GAD). Prescribed Escitalopram 10mg once daily. Recommended cognitive behavioral therapy. Patient requested this information remain private from routine medical consultations."
+      }
+    ]
+  },
+  "14-9876-5432-1098": {
+    "patientId": "14-9876-5432-1098",
+    "name": "Priya Patel",
+    "age": 29,
+    "gender": "Female",
+    "bloodGroup": "A+",
+    "phone": "+91-9123456789",
+    "address": "45 Satellite Road, Ahmedabad, Gujarat 380015",
+    "allergies": ["Dust Mites", "Pollen"],
+    "conditions": ["Celiac Disease (Gluten Intolerance)", "First Trimester Pregnancy", "Iron Deficiency Anemia"],
+    "medications": [
+      "Prenatal Multivitamin - Once daily",
+      "Folic Acid 5mg - Once daily",
+      "Ferrous Sulfate 325mg - Twice daily"
+    ],
+    "emergencyContact": {
+      "name": "Rajesh Patel",
+      "relation": "Husband",
+      "phone": "+91-9123456790"
     },
-    {
-      "resource": {
-        "resourceType": "AllergyIntolerance",
-        "clinicalStatus": { "text": "active" },
-        "code": { "text": "Penicillin" }
+    "reports": [
+      {
+        "reportId": "RPT-2024-101",
+        "date": "2024-02-25",
+        "type": "Obstetric Ultrasound",
+        "department": "Obstetrics & Gynecology",
+        "provider": "Zydus Hospital, Ahmedabad",
+        "summary": "First Trimester Ultrasound - 12 Weeks",
+        "fhirData": {
+          "resourceType": "DiagnosticReport",
+          "status": "final",
+          "category": "Imaging",
+          "code": {
+            "coding": [{
+              "system": "http://loinc.org",
+              "code": "11636-8",
+              "display": "Ultrasound Obstetric"
+            }]
+          },
+          "findings": {
+            "gestationalAge": "12 weeks 3 days",
+            "fetalHeartRate": "158 bpm",
+            "crownRumpLength": "58 mm",
+            "placentalPosition": "Anterior",
+            "amnioticFluid": "Normal",
+            "fetalMovement": "Active",
+            "estimatedDueDate": "2024-09-10"
+          }
+        },
+        "doctorNotes": "Singleton intrauterine pregnancy at 12 weeks 3 days. Fetal heart rate strong at 158 bpm. All measurements appropriate for gestational age. No structural abnormalities detected. Nuchal translucency within normal limits (1.8mm). Patient advised to continue prenatal vitamins, folic acid supplementation. Strict gluten-free diet essential. Next ultrasound scheduled at 20 weeks for anomaly scan."
+      },
+      {
+        "reportId": "RPT-2024-102",
+        "date": "2024-02-10",
+        "type": "Lab Report",
+        "department": "Pathology",
+        "provider": "Metropolis Healthcare, Ahmedabad",
+        "summary": "Prenatal Panel - First Trimester",
+        "fhirData": {
+          "resourceType": "DiagnosticReport",
+          "status": "final",
+          "category": "Laboratory",
+          "result": [
+            {
+              "testName": "Hemoglobin",
+              "value": 10.2,
+              "unit": "g/dL",
+              "normalRange": "12.0-15.5",
+              "status": "low",
+              "interpretation": "Mild anemia. Iron supplementation required."
+            },
+            {
+              "testName": "Serum Iron",
+              "value": 45,
+              "unit": "μg/dL",
+              "normalRange": "60-170",
+              "status": "low",
+              "interpretation": "Iron deficiency confirmed."
+            },
+            {
+              "testName": "Ferritin",
+              "value": 12,
+              "unit": "ng/mL",
+              "normalRange": "20-200",
+              "status": "low",
+              "interpretation": "Depleted iron stores."
+            },
+            {
+              "testName": "TSH",
+              "value": 2.1,
+              "unit": "mIU/L",
+              "normalRange": "0.5-4.5",
+              "status": "normal",
+              "interpretation": "Thyroid function normal."
+            },
+            {
+              "testName": "Blood Glucose (Fasting)",
+              "value": 88,
+              "unit": "mg/dL",
+              "normalRange": "70-100",
+              "status": "normal",
+              "interpretation": "No gestational diabetes at this time."
+            }
+          ]
+        },
+        "doctorNotes": "Patient shows iron deficiency anemia (Hb 10.2 g/dL) likely due to pregnancy demands and celiac disease affecting iron absorption. Prescribed Ferrous Sulfate 325mg twice daily. Advised iron-rich foods: spinach, dates, pomegranate (all gluten-free). Glucose tolerance test scheduled for 24-28 weeks."
+      },
+      {
+        "reportId": "RPT-2023-103",
+        "date": "2023-08-22",
+        "type": "Endoscopy Report",
+        "department": "Gastroenterology",
+        "provider": "Sterling Hospital, Ahmedabad",
+        "summary": "Upper GI Endoscopy with Biopsy",
+        "fhirData": {
+          "resourceType": "DiagnosticReport",
+          "status": "final",
+          "category": "Procedure",
+          "code": {
+            "coding": [{
+              "system": "http://snomed.info/sct",
+              "code": "423827005",
+              "display": "Esophagogastroduodenoscopy"
+            }]
+          },
+          "findings": {
+            "esophagus": "Normal mucosa",
+            "stomach": "Mild gastritis",
+            "duodenum": "Severe villous atrophy, scalloping of folds",
+            "biopsy": "Marsh Grade 3c - Total villous atrophy consistent with Celiac Disease"
+          }
+        },
+        "doctorNotes": "Endoscopy confirms Celiac Disease with severe villous atrophy (Marsh 3c). Biopsy shows complete loss of villi in duodenum. Patient MUST maintain strict gluten-free diet for life. Even trace amounts of gluten (wheat, barley, rye, contaminated oats) will trigger autoimmune response and intestinal damage. Avoid: bread, pasta, chapati, biscuits, cakes, beer, soy sauce (unless labeled gluten-free). Safe alternatives: rice, quinoa, millets, corn, potatoes. Prescribed vitamin B12 and calcium supplements due to malabsorption. Follow-up endoscopy in 1 year to assess healing."
       }
+    ],
+    "sensitiveReports": []
+  },
+  "14-4567-8901-2345": {
+    "patientId": "14-4567-8901-2345",
+    "name": "Vikram Singh",
+    "age": 34,
+    "gender": "Male",
+    "bloodGroup": "B-",
+    "phone": "+91-9988776655",
+    "address": "78 Connaught Place, New Delhi 110001",
+    "allergies": ["Peanuts (Severe)", "Tree Nuts (Severe)", "Shellfish (Moderate)", "Bee Venom"],
+    "conditions": ["Severe Asthma", "Multiple Food Allergies", "Allergic Rhinitis"],
+    "medications": [
+      "EpiPen Auto-Injector 0.3mg - Carry at all times",
+      "Albuterol Inhaler - As needed for wheezing",
+      "Fluticasone Inhaler 250mcg - Twice daily",
+      "Montelukast 10mg - Once daily at night",
+      "Cetirizine 10mg - Once daily for allergies"
+    ],
+    "emergencyContact": {
+      "name": "Meera Singh",
+      "relation": "Wife",
+      "phone": "+91-9988776656"
     },
-    {
-      "resource": {
-        "resourceType": "Condition",
-        "clinicalStatus": { "text": "active" },
-        "code": { "text": "Hypertension Grade 1" },
-        "subject": { "reference": "Patient/14-9876-5432-1011" },
-        "meta": { "security": [{ "code": "RESTRICTED", "display": "Requires OTP Consent" }] }
+    "reports": [
+      {
+        "reportId": "RPT-2024-201",
+        "date": "2024-02-20",
+        "type": "Emergency Department Report",
+        "department": "Emergency Medicine",
+        "provider": "AIIMS, New Delhi",
+        "summary": "Anaphylaxis Episode - Peanut Exposure",
+        "fhirData": {
+          "resourceType": "Encounter",
+          "status": "finished",
+          "class": "emergency",
+          "priority": "urgent",
+          "reasonCode": "Anaphylaxis due to peanut exposure"
+        },
+        "incidentDetails": {
+          "arrivalTime": "2024-02-20T14:35:00",
+          "chiefComplaint": "Difficulty breathing, facial swelling, hives after eating restaurant food",
+          "vitalSigns": {
+            "bloodPressure": "90/60 mmHg",
+            "heartRate": "125 bpm",
+            "respiratoryRate": "28/min",
+            "oxygenSaturation": "89% on room air"
+          },
+          "treatment": [
+            "Epinephrine 0.3mg IM (patient's EpiPen) - administered by patient before arrival",
+            "Epinephrine 0.3mg IM - second dose in ED",
+            "IV Normal Saline 1L bolus",
+            "Methylprednisolone 125mg IV",
+            "Diphenhydramine 50mg IV",
+            "Oxygen 4L via nasal cannula"
+          ],
+          "response": "Symptoms improved within 20 minutes. BP stabilized at 110/70. O2 sat 96%. Observed for 6 hours. No biphasic reaction."
+        },
+        "doctorNotes": "Patient experienced severe anaphylaxis after consuming food at restaurant labeled 'nut-free' but likely cross-contaminated with peanuts. This is patient's 3rd anaphylactic episode in 2 years. CRITICAL: Patient has life-threatening peanut allergy. Must carry TWO EpiPens at all times. Avoid all restaurants that serve peanuts. Read all food labels carefully. Prescribed additional EpiPen. Referred to allergist for immunotherapy evaluation. Educated on recognizing early symptoms and immediate EpiPen use."
+      },
+      {
+        "reportId": "RPT-2023-202",
+        "date": "2023-12-05",
+        "type": "Allergy Testing Report",
+        "department": "Immunology & Allergy",
+        "provider": "Sir Ganga Ram Hospital, New Delhi",
+        "summary": "Comprehensive Allergy Panel",
+        "fhirData": {
+          "resourceType": "DiagnosticReport",
+          "status": "final",
+          "category": "Laboratory",
+          "code": {
+            "coding": [{
+              "system": "http://loinc.org",
+              "code": "15765-0",
+              "display": "Allergen specific IgE"
+            }]
+          },
+          "result": [
+            {
+              "allergen": "Peanuts",
+              "igELevel": 125,
+              "unit": "kU/L",
+              "class": "6",
+              "severity": "Extremely High",
+              "interpretation": "Life-threatening allergy. Strict avoidance mandatory."
+            },
+            {
+              "allergen": "Cashews",
+              "igELevel": 98,
+              "unit": "kU/L",
+              "class": "5",
+              "severity": "Very High",
+              "interpretation": "Severe allergy. Complete avoidance required."
+            },
+            {
+              "allergen": "Almonds",
+              "igELevel": 87,
+              "unit": "kU/L",
+              "class": "5",
+              "severity": "Very High",
+              "interpretation": "Severe allergy. Complete avoidance required."
+            },
+            {
+              "allergen": "Walnuts",
+              "igELevel": 76,
+              "unit": "kU/L",
+              "class": "5",
+              "severity": "Very High",
+              "interpretation": "Severe allergy. Complete avoidance required."
+            },
+            {
+              "allergen": "Shrimp",
+              "igELevel": 45,
+              "unit": "kU/L",
+              "class": "4",
+              "severity": "High",
+              "interpretation": "Moderate to severe allergy. Avoid consumption."
+            },
+            {
+              "allergen": "Crab",
+              "igELevel": 38,
+              "unit": "kU/L",
+              "class": "4",
+              "severity": "High",
+              "interpretation": "Moderate to severe allergy. Avoid consumption."
+            },
+            {
+              "allergen": "Dust Mites",
+              "igELevel": 52,
+              "unit": "kU/L",
+              "class": "4",
+              "severity": "High",
+              "interpretation": "Environmental allergy contributing to asthma."
+            },
+            {
+              "allergen": "Pollen (Mixed)",
+              "igELevel": 34,
+              "unit": "kU/L",
+              "class": "3",
+              "severity": "Moderate",
+              "interpretation": "Seasonal allergic rhinitis."
+            }
+          ]
+        },
+        "doctorNotes": "IgE testing confirms EXTREME hypersensitivity to peanuts (Class 6, 125 kU/L) and severe allergies to all tree nuts. Patient experienced near-fatal anaphylaxis in 2022 requiring ICU admission. ABSOLUTE AVOIDANCE of peanuts, tree nuts, and shellfish mandatory. Cross-contamination risk is significant - avoid facilities that process nuts. Patient must: 1) Carry 2 EpiPens always, 2) Wear medical alert bracelet, 3) Inform all restaurants of allergy, 4) Avoid buffets and shared cooking surfaces. Family members trained on EpiPen administration."
+      },
+      {
+        "reportId": "RPT-2023-203",
+        "date": "2023-06-14",
+        "type": "Pulmonary Function Test",
+        "department": "Pulmonology",
+        "provider": "Max Hospital, New Delhi",
+        "summary": "Spirometry and Asthma Control Assessment",
+        "fhirData": {
+          "resourceType": "DiagnosticReport",
+          "status": "final",
+          "category": "Procedure",
+          "code": {
+            "coding": [{
+              "system": "http://loinc.org",
+              "code": "81459-0",
+              "display": "Spirometry"
+            }]
+          },
+          "findings": {
+            "FEV1": "78% predicted",
+            "FVC": "85% predicted",
+            "FEV1/FVC": "0.72",
+            "peakFlow": "420 L/min",
+            "bronchodilatorResponse": "15% improvement post-albuterol"
+          }
+        },
+        "doctorNotes": "Spirometry shows mild obstructive pattern consistent with asthma. FEV1 at 78% predicted with significant bronchodilator response (15% improvement). Asthma currently well-controlled on Fluticasone and Montelukast. No recent exacerbations. Peak flow monitoring shows good control. Patient advised to: 1) Continue daily controller medications, 2) Use Albuterol before exercise, 3) Avoid triggers (cold air, smoke, strong odors), 4) Monitor peak flow daily. Emergency action plan reviewed."
       }
+    ],
+    "sensitiveReports": []
+  },
+  "TEMP-EMERGENCY-001": {
+    "patientId": "TEMP-EMERGENCY-001",
+    "name": "Unknown Patient (Accident Victim)",
+    "age": "Unknown (Estimated 30-35)",
+    "gender": "Male",
+    "bloodGroup": "B+ (Tested on admission)",
+    "phone": "Not Available",
+    "address": "Unknown - Awaiting identification",
+    "allergies": ["Unknown - Under observation"],
+    "conditions": ["Head Trauma", "Multiple Fractures (Left Leg)", "Internal Bleeding (Stabilized)"],
+    "medications": [
+      "Morphine 10mg IV - Pain management",
+      "Ceftriaxone 1g IV - Infection prevention",
+      "Normal Saline IV - Fluid replacement"
+    ],
+    "emergencyContact": {
+      "name": "Not Available",
+      "relation": "Awaiting family contact",
+      "phone": "Not Available"
     },
-    {
-      "resource": {
-        "resourceType": "Condition",
-        "clinicalStatus": { "text": "resolved" },
-        "code": { "text": "Peptic Ulcer (2023)" },
-        "meta": { "security": [{ "code": "RESTRICTED", "display": "Requires OTP Consent" }] }
+    "admissionDetails": {
+      "admittedBy": "Unknown stranger (left after bringing patient)",
+      "admissionDate": "2024-03-02",
+      "admissionTime": "14:30",
+      "location": "Found at MG Road intersection",
+      "circumstances": "Road traffic accident. Patient was unconscious. No identification documents found.",
+      "policeReport": "FIR #2024/0302/001 filed at City Police Station"
+    },
+    "reports": [
+      {
+        "reportId": "RPT-TEMP-001",
+        "date": "2024-03-02",
+        "type": "Emergency CT Scan",
+        "department": "Radiology",
+        "provider": "Emergency Department",
+        "summary": "Head and Body CT Scan - Emergency Protocol",
+        "fhirData": {
+          "resourceType": "DiagnosticReport",
+          "status": "final",
+          "category": "Imaging",
+          "findings": {
+            "head": "Mild concussion, no skull fracture, small subdural hematoma (monitoring required)",
+            "chest": "No internal organ damage, minor rib contusions",
+            "abdomen": "Liver laceration (Grade 2) - stable, no active bleeding",
+            "leftLeg": "Compound fracture of tibia and fibula, requires surgical fixation"
+          }
+        },
+        "doctorNotes": "Patient admitted via emergency. Unconscious on arrival. Stabilized in ER. CT shows head trauma with small subdural hematoma - neurosurgery consulted. Left leg compound fracture - orthopedic surgery scheduled. Liver laceration stable. Patient regained consciousness after 2 hours. Unable to recall identity or accident details. Awaiting family identification."
+      },
+      {
+        "reportId": "RPT-TEMP-002",
+        "date": "2024-03-02",
+        "type": "Emergency Lab Panel",
+        "department": "Pathology",
+        "provider": "Emergency Department",
+        "summary": "Trauma Panel - Emergency Protocol",
+        "fhirData": {
+          "resourceType": "DiagnosticReport",
+          "status": "final",
+          "category": "Laboratory",
+          "result": [
+            {
+              "testName": "Hemoglobin",
+              "value": 9.2,
+              "unit": "g/dL",
+              "normalRange": "13.5-17.5",
+              "status": "low",
+              "interpretation": "Moderate anemia due to blood loss. Transfusion required."
+            },
+            {
+              "testName": "Blood Type",
+              "value": "B+",
+              "unit": "",
+              "normalRange": "N/A",
+              "status": "normal",
+              "interpretation": "Blood type confirmed for transfusion."
+            },
+            {
+              "testName": "Creatinine",
+              "value": 1.8,
+              "unit": "mg/dL",
+              "normalRange": "0.7-1.3",
+              "status": "high",
+              "interpretation": "Elevated - possible kidney stress from trauma."
+            },
+            {
+              "testName": "Alcohol Level",
+              "value": 0,
+              "unit": "mg/dL",
+              "normalRange": "0",
+              "status": "normal",
+              "interpretation": "No alcohol detected."
+            }
+          ]
+        },
+        "doctorNotes": "Blood loss significant - 2 units B+ blood transfused. Kidney function slightly impaired, monitoring required. No alcohol or drugs detected. Patient is cooperative but has no memory of identity or accident."
       }
+    ],
+    "sensitiveReports": [],
+    "temporaryStatus": {
+      "isTemporary": true,
+      "reason": "Unidentified emergency admission",
+      "dataRetention": "All treatment data will be linked to patient's ABHA ID once identified",
+      "identificationStatus": "Pending - Police and hospital working to identify patient",
+      "nextSteps": [
+        "Awaiting family members to identify patient",
+        "Police investigating accident and checking missing persons reports",
+        "Hospital social worker contacted to assist with identification",
+        "Once identified, temporary record will be merged with patient's ABHA profile"
+      ]
     }
-  ]
+  }
 }

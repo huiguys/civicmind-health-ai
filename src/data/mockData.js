@@ -4,7 +4,7 @@ export const hospitalQueue = [
   {
     id: "Q-101",
     name: "Rahul Sharma",
-    abhaId: "14-9876-5432-1011",
+    abhaId: "14-1234-5678-9012",
     status: "Waiting in Lobby",
     otpVerified: true,
     avatar: "RS"
@@ -12,19 +12,30 @@ export const hospitalQueue = [
   {
     id: "Q-102",
     name: "Priya Patel",
-    abhaId: "14-1122-3344-5566",
+    abhaId: "14-9876-5432-1098",
     status: "Awaiting Reception OTP",
     otpVerified: false,
     avatar: "PP"
   },
   {
     id: "Q-103",
-    name: "Amit Singh",
-    abhaId: "14-9988-7766-5544",
+    name: "Vikram Singh",
+    abhaId: "14-4567-8901-2345",
     status: "Emergency Override",
     otpVerified: false,
     isEmergency: true,
-    avatar: "AS"
+    avatar: "VS"
+  },
+  {
+    id: "Q-104",
+    name: "Unknown Patient (Accident Victim)",
+    abhaId: "TEMP-EMERGENCY-001",
+    status: "No ID - Emergency Admission",
+    otpVerified: false,
+    isEmergency: true,
+    isUnidentified: true,
+    avatar: "?",
+    admissionNote: "Road accident victim. Brought by stranger. No identification documents. Awaiting family/ID verification."
   }
 ];
 

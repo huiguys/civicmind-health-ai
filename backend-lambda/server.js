@@ -17,6 +17,8 @@ app.use(express.json({ limit: '50mb' }));
 
 app.all('/api/*', async (req, res) => {
     try {
+        console.log(`\n📥 Incoming Request: ${req.method} ${req.path}`);
+        
         const event = {
             path: req.path,
             httpMethod: req.method,
@@ -25,10 +27,12 @@ app.all('/api/*', async (req, res) => {
         };
 
         const response = await lambda.handler(event);
+        console.log(`✅ Response Status: ${response.statusCode}`);
+        
         res.status(response.statusCode || 200).send(response.body);
 
     } catch (error) {
-        console.error("Local Server Error:", error);
+        console.error("❌ Local Server Error:", error);
         res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 });

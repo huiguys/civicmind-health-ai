@@ -28,6 +28,7 @@ CivicMind Health AI enables patients to understand their medical reports by tran
 3. IF the ABHA network is unavailable, THEN THE System SHALL return a descriptive error message to the patient
 4. WHEN multiple reports are available, THE System SHALL display a list of reports with dates and types for selection
 
+
 ### Requirement 2: Language Selection
 
 **User Story:** As a patient, I want to select my preferred local language, so that I can read my medical reports in a language I understand.

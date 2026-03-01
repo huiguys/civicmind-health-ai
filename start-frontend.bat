@@ -1,0 +1,3 @@
+@echo off
+echo Starting CivicMind Frontend...
+npm run dev
