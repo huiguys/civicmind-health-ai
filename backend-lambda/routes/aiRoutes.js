@@ -496,5 +496,37 @@ module.exports = {
     handleCheckPrescription,
     handlePatientHealthSummary,
     handleAnalyzeImage,
-    handleTranslateSummary
+    handleTranslateSummary,
+    handleTextToSpeech
 };
+
+
+/**
+ * Text-to-Speech using AWS Polly
+ */
+async function handleTextToSpeech(body) {
+    const { text, language } = body;
+
+    if (!text) {
+        return { 
+            statusCode: 400, 
+            body: JSON.stringify({ error: "Missing text parameter." }) 
+        };
+    }
+
+    try {
+        const { textToSpeech } = require('../services/pollyService');
+        const audioBase64 = await textToSpeech(text, language || 'english');
+        
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ audioBase64 })
+        };
+    } catch (error) {
+        console.error("Text-to-Speech Error:", error);
+        return { 
+            statusCode: 500, 
+            body: JSON.stringify({ error: "Failed to generate speech.", details: error.message }) 
+        };
+    }
+}

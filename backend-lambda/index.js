@@ -8,7 +8,8 @@ const {
     handleCheckPrescription,
     handlePatientHealthSummary,
     handleAnalyzeImage,
-    handleTranslateSummary
+    handleTranslateSummary,
+    handleTextToSpeech
 } = require('./routes/aiRoutes');
 
 // Initialize AWS Clients
@@ -70,6 +71,11 @@ exports.handler = async (event) => {
 
         if (path === '/api/translate-summary') {
             const result = await handleTranslateSummary(body);
+            return { ...result, headers };
+        }
+
+        if (path === '/api/text-to-speech') {
+            const result = await handleTextToSpeech(body);
             return { ...result, headers };
         }
 

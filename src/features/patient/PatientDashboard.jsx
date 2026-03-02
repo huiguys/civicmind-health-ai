@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { usePatient } from '../../shared/context/PatientContext'
+import { useSpeech } from '../../shared/hooks/useSpeech'
 import abhaData from '../../data/abhaFhirMock.json'
 
 // Helper function to format markdown text to HTML
@@ -29,8 +30,8 @@ const formatMarkdown = (text) => {
 
 function PatientDashboard() {
   const { currentPatient } = usePatient()
+  const { isSpeaking, speak } = useSpeech()
   const [activeTab, setActiveTab] = useState("overview")
-  const [isSpeaking, setIsSpeaking] = useState(false)
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -111,25 +112,11 @@ ${patientData.medications && patientData.medications.length > 0
     }
 
     generateHealthSummary()
-
-    return () => {
-      window.speechSynthesis.cancel()
-    }
   }, [patientData])
 
   const toggleSpeech = () => {
-    if (isSpeaking) {
-      window.speechSynthesis.cancel()
-      setIsSpeaking(false)
-    } else {
-      const utterance = new SpeechSynthesisUtterance()
-      const textToSpeak = currentLanguage === 'english' ? healthSummary : translatedSummary
-      utterance.text = textToSpeak.replace(/<[^>]*>/g, '').replace(/\*/g, '')
-      utterance.lang = currentLanguage === 'english' ? 'en-US' : 'hi-IN'
-      utterance.onend = () => setIsSpeaking(false)
-      window.speechSynthesis.speak(utterance)
-      setIsSpeaking(true)
-    }
+    const textToSpeak = currentLanguage === 'english' ? healthSummary : translatedSummary
+    speak(textToSpeak, currentLanguage)
   }
 
   const translateSummary = async (targetLanguage) => {
@@ -281,7 +268,7 @@ ${patientData.medications && patientData.medications.length > 0
           <div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-8">
               {/* Left: AI Summary */}
-              <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-xl overflow-y-auto">
+              <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-xl max-h-[700px] overflow-y-auto custom-scrollbar"
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
