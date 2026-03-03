@@ -1,6 +1,6 @@
 # CivicMind Health AI - System Architecture
 
-> **Current Status:** Production-ready prototype with AWS Bedrock (Gemma 3 27B) and AWS Polly integration. All core features implemented and functional.
+> **Current Status:** Production-ready prototype with AWS Bedrock (Meta Llama 4 Scout 17B) and AWS Polly integration. All core features implemented and functional.
 
 ## 🏗️ Complete System Architecture
 
@@ -9,7 +9,7 @@ graph TB
     subgraph "External Systems"
         ABHA[("🏥 ABHA Network<br/>(Ayushman Bharat)<br/>National Health Records")]
         Hospital[("🏨 Hospital Network<br/>Reception System<br/>Patient Queue")]
-        AWS[("☁️ AWS Cloud<br/>Bedrock AI<br/>Gemma 3 27B")]
+        AWS[("☁️ AWS Cloud<br/>Bedrock AI<br/>Llama 4 Scout 17B")]
     end
 
     subgraph "CivicMind Platform"
@@ -41,7 +41,7 @@ graph TB
             end
             
             subgraph "Services"
-                GemmaService["Gemma AI Service<br/>AWS Bedrock Integration"]
+                LlamaService["Llama AI Service<br/>AWS Bedrock Integration"]
             end
             
             subgraph "Middleware"
@@ -79,10 +79,10 @@ graph TB
     API --> Auth
     Auth --> Logger
     Logger --> HealthCtrl
-    HealthCtrl --> GemmaService
-    GemmaService -->|AI Inference| AWS
-    AWS -->|AI Response| GemmaService
-    GemmaService --> HealthCtrl
+    HealthCtrl --> LlamaService
+    LlamaService -->|AI Inference| AWS
+    AWS -->|AI Response| LlamaService
+    LlamaService --> HealthCtrl
     HealthCtrl --> ErrorHandler
     
     %% Data Sync
@@ -94,7 +94,7 @@ graph TB
     style Hospital fill:#2196F3,stroke:#1565C0,color:#fff
     style AWS fill:#FF9800,stroke:#E65100,color:#fff
     style API fill:#9C27B0,stroke:#6A1B9A,color:#fff
-    style GemmaService fill:#FF5722,stroke:#D84315,color:#fff
+    style LlamaService fill:#FF5722,stroke:#D84315,color:#fff
 ```
 
 ## 🔄 Data Flow Diagrams
@@ -189,7 +189,7 @@ sequenceDiagram
   - Appointment scheduling
   - Emergency patient handling
 
-### 3. **AWS Bedrock AI (Gemma 3 27B)**
+### 3. **AWS Bedrock AI (Llama 4 Scout 17B)**
 - **Purpose**: AI-powered medical intelligence
 - **Capabilities**:
   - Generate patient health summaries
@@ -238,7 +238,7 @@ graph LR
 | **Frontend** | React 18 + Vite | Modern UI framework |
 | **Styling** | TailwindCSS | Responsive design |
 | **Backend** | Node.js + Express | API server |
-| **AI Engine** | AWS Bedrock (Gemma 3 27B) | Medical AI |
+| **AI Engine** | AWS Bedrock (Llama 4 Scout 17B) | Medical AI |
 | **Health Records** | ABHA Network (FHIR) | National health data |
 | **Hospital System** | REST API Integration | Queue management |
 | **Authentication** | ABHA ID + OTP | Secure login |
@@ -255,7 +255,7 @@ graph TB
     subgraph "AWS Cloud"
         CloudFront["CloudFront CDN<br/>Static Assets"]
         Lambda["Lambda Functions<br/>API Backend"]
-        Bedrock["Bedrock AI<br/>Gemma 3 27B"]
+        Bedrock["Bedrock AI<br/>Llama 4 Scout 17B"]
         S3["S3 Bucket<br/>Frontend Hosting"]
     end
     

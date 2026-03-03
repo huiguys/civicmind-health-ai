@@ -1,4 +1,4 @@
-const { callGemma } = require('../services/gemmaService');
+const { callLlama } = require('../services/llamaService');
 
 /**
  * Patient AI Chatbot - Strict patient-report-only responses
@@ -42,7 +42,7 @@ STRICT RULES:
     };
 
     try {
-        const reply = await callGemma([
+        const reply = await callLlama([
             systemMessage,
             { role: "user", content: message }
         ], 800);
@@ -112,7 +112,7 @@ CRITICAL RULES:
     };
 
     try {
-        const reply = await callGemma([
+        const reply = await callLlama([
             systemMessage,
             { role: "user", content: question }
         ], 1000);
@@ -170,7 +170,7 @@ ${reportsContext}
 Highlight: key conditions, critical findings, immediate concerns, treatment status.`;
 
     try {
-        const summary = await callGemma([{ role: "user", content: prompt }], 500);
+        const summary = await callLlama([{ role: "user", content: prompt }], 500);
         
         return {
             statusCode: 200,
@@ -219,7 +219,7 @@ Generate a comprehensive patient overview with these sections:
 Format your response in clear sections with bullet points. Be concise but thorough.`;
 
     try {
-        const overview = await callGemma([{ role: "user", content: prompt }], 800);
+        const overview = await callLlama([{ role: "user", content: prompt }], 800);
         
         return {
             statusCode: 200,
@@ -244,7 +244,7 @@ async function handleTranslateReport(body) {
     Translate this into simple, empathetic ${targetLanguage}. Remove scary jargon. Remind them it is treatable and to consult their doctor.`;
 
     try {
-        const translation = await callGemma([{ role: "user", content: prompt }], 500);
+        const translation = await callLlama([{ role: "user", content: prompt }], 500);
         
         return {
             statusCode: 200,
@@ -284,7 +284,7 @@ Respond ONLY in this JSON format:
 }`;
 
     try {
-        const response = await callGemma([{ role: "user", content: prompt }], 800);
+        const response = await callLlama([{ role: "user", content: prompt }], 800);
         const safetyAnalysis = JSON.parse(response);
         
         return {
@@ -350,7 +350,7 @@ Create a friendly, encouraging health summary with these sections:
 Use emojis, be warm and encouraging, avoid medical jargon. Make it easy to understand!`;
 
     try {
-        const summary = await callGemma([{ role: "user", content: prompt }], 1000);
+        const summary = await callLlama([{ role: "user", content: prompt }], 1000);
         
         return {
             statusCode: 200,
@@ -416,7 +416,7 @@ Be empathetic, clear, and use emojis. Focus on their specific health needs.`
     };
 
     try {
-        const analysis = await callGemma([systemMessage, userMessage], 1000);
+        const analysis = await callLlama([systemMessage, userMessage], 1000);
         
         return {
             statusCode: 200,
@@ -472,7 +472,7 @@ ${text}
 TRANSLATED TEXT (${languageNames[targetLanguage] || targetLanguage}):`;
 
     try {
-        const translation = await callGemma([{ role: "user", content: prompt }], 1500);
+        const translation = await callLlama([{ role: "user", content: prompt }], 1500);
         
         return {
             statusCode: 200,

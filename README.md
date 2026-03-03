@@ -46,7 +46,7 @@ CivicMind Health AI is an intelligent healthcare companion that bridges the gap 
 5. **Voice Output** - AWS Polly reads reports aloud
 6. **Interactive Chat** - AI answers patient questions about their health
 
-Enterprise-grade healthcare platform powered by AWS Bedrock AI (Google Gemma 3 27B) and AWS Polly.
+Enterprise-grade healthcare platform powered by AWS Bedrock AI (Meta Llama 4 Scout 17B) and AWS Polly.
 
 ## 🏗️ Project Structure
 
@@ -150,7 +150,7 @@ AWS_SECRET_ACCESS_KEY=your_secret_key_here
 AWS_REGION=us-east-1
 
 # AWS Bedrock Model
-BEDROCK_MODEL_ID=google.gemma-3-27b-it
+BEDROCK_MODEL_ID=meta.llama4-scout-17b-instruct-v1:0
 
 # Server Configuration
 PORT=3001
@@ -162,7 +162,7 @@ LOG_LEVEL=info
 
 **Important:** Make sure your AWS account has:
 - AWS Bedrock access enabled
-- Gemma 3 27B model access granted
+- Llama 4 Scout 17B model access granted
 - AWS Polly access enabled
 
 ## 📦 Core Features
@@ -201,13 +201,13 @@ LOG_LEVEL=info
 
 **Backend:**
 - Node.js + Express
-- AWS Bedrock (Google Gemma 3 27B) - Text generation
+- AWS Bedrock (Meta Llama 4 Scout 17B) - Text generation
 - AWS Polly - Text-to-speech (Neural voices)
 - PDFKit - Report generation
 - CORS enabled for cross-origin requests
 
 **AI Models:**
-- **Gemma 3 27B** - Health summaries, translations, chat, diagnostics
+- **Llama 4 Scout 17B** - Health summaries, translations, chat, diagnostics
 - **AWS Polly** - Joanna (English), Aditi (Hindi) voices
 
 **Infrastructure:**

@@ -1,4 +1,4 @@
-const { callGemma } = require('../services/gemmaService');
+const { callLlama } = require('../services/llamaService');
 
 /**
  * Generate patient health summary
@@ -26,7 +26,7 @@ Create a friendly, personalized health summary that includes:
 
 Use simple language, emojis, and markdown formatting (## for headings, ** for bold, * for bullets).`;
 
-    const summary = await callGemma(prompt);
+    const summary = await callLlama(prompt);
 
     res.json({ summary });
   } catch (error) {
@@ -54,7 +54,7 @@ Patient Question: ${message}
 
 Provide a helpful, accurate response based on their medical records. Be friendly and use simple language.`;
 
-    const reply = await callGemma(prompt);
+    const reply = await callLlama(prompt);
 
     res.json({ reply });
   } catch (error) {
@@ -90,7 +90,7 @@ ${text}
 
 Provide ONLY the translation, no explanations.`;
 
-    const translation = await callGemma(prompt);
+    const translation = await callLlama(prompt);
 
     res.json({ translation });
   } catch (error) {
