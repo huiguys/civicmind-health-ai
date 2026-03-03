@@ -46,7 +46,7 @@ CivicMind Health AI is an intelligent healthcare companion that bridges the gap 
 5. **Voice Output** - AWS Polly reads reports aloud
 6. **Interactive Chat** - AI answers patient questions about their health
 
-Enterprise-grade healthcare platform powered by AWS Bedrock AI (Meta Llama 4 Scout 17B) and AWS Polly.
+Enterprise-grade healthcare platform powered by AWS Bedrock AI (Google Gemma 3 27B) and AWS Polly.
 
 ## 🏗️ Project Structure
 
@@ -101,6 +101,68 @@ backend-lambda/
 └── .env                 # Environment variables
 ```
 
+## � ABHA Network Integration
+
+### Current Status: Prototype with Mock Data
+
+This is a **prototype demonstration**. In production, the system will integrate with India's ABHA (Ayushman Bharat Health Account) network to fetch real patient records.
+
+### How It Will Work in Production:
+
+1. **Patient Registration at Hospital Reception**
+   - Reception staff enters patient's 14-digit ABHA ID
+   - System sends OTP to patient's registered mobile number
+   - Patient verifies OTP to authenticate
+
+2. **Consent Management**
+   - Patient grants consent for hospital to access their records
+   - Consent is time-bound and purpose-specific
+   - Patient can revoke consent anytime via ABHA app
+
+3. **Data Fetching**
+   - System fetches patient's complete medical history from ABHA network
+   - Records are in FHIR R4 format (international healthcare standard)
+   - Data includes: diagnoses, medications, lab reports, discharge summaries
+
+4. **AI Processing**
+   - AWS Bedrock Gemma 3 27B analyzes the FHIR records
+   - Generates patient-friendly health summaries
+   - Translates to patient's preferred language
+   - Highlights critical findings for doctors
+
+5. **Display to Doctor & Patient**
+   - Doctor sees AI-generated patient overview in queue
+   - Patient sees simplified health summary in their portal
+   - Both can chat with AI about the medical records
+
+### Why We Can't Connect Now:
+
+- ABHA API access requires ABDM (Ayushman Bharat Digital Mission) certification
+- Certification process includes security audits and compliance checks
+- Sandbox testing must be completed before production access
+- This prototype demonstrates the complete workflow with mock data
+
+### What's Real vs Mock:
+
+| Component | Status |
+|-----------|--------|
+| **AI Processing** | ✅ Real (AWS Bedrock Gemma 3 27B) |
+| **Translation** | ✅ Real (AI-powered, 6 languages) |
+| **Voice** | ✅ Real (AWS Polly neural voices) |
+| **ABHA Data Fetch** | ❌ Mock (will be real in production) |
+| **Patient Records** | ❌ Mock JSON (will be FHIR from ABHA) |
+| **OTP Verification** | ❌ Simulated (will be real ABHA OTP) |
+
+### Production Integration Plan:
+
+**Phase 1:** Prototype ✅ (Current)  
+**Phase 2:** ABHA Sandbox Integration  
+**Phase 3:** ABDM Certification  
+**Phase 4:** Production Deployment  
+**Phase 5:** Multi-Hospital Rollout  
+
+For detailed technical documentation on ABHA integration, see [ARCHITECTURE.md](./ARCHITECTURE.md#-abha-network-integration-production-implementation).
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -150,7 +212,7 @@ AWS_SECRET_ACCESS_KEY=your_secret_key_here
 AWS_REGION=us-east-1
 
 # AWS Bedrock Model
-BEDROCK_MODEL_ID=meta.llama4-scout-17b-instruct-v1:0
+BEDROCK_MODEL_ID=google.gemma-3-27b-it
 
 # Server Configuration
 PORT=3001
@@ -162,7 +224,7 @@ LOG_LEVEL=info
 
 **Important:** Make sure your AWS account has:
 - AWS Bedrock access enabled
-- Llama 4 Scout 17B model access granted
+- Gemma 3 27B model access granted
 - AWS Polly access enabled
 
 ## 📦 Core Features
@@ -201,13 +263,13 @@ LOG_LEVEL=info
 
 **Backend:**
 - Node.js + Express
-- AWS Bedrock (Meta Llama 4 Scout 17B) - Text generation
+- AWS Bedrock (Google Gemma 3 27B) - Text generation
 - AWS Polly - Text-to-speech (Neural voices)
 - PDFKit - Report generation
 - CORS enabled for cross-origin requests
 
 **AI Models:**
-- **Llama 4 Scout 17B** - Health summaries, translations, chat, diagnostics
+- **Gemma 3 27B** - Health summaries, translations, chat, diagnostics
 - **AWS Polly** - Joanna (English), Aditi (Hindi) voices
 
 **Infrastructure:**
