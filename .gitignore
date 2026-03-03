@@ -22,3 +22,9 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Cache files
+backend-lambda/cache/pdfs/*.pdf
+
+# Log files
+backend-lambda/logs/*.log

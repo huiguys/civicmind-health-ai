@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import PrescriptionBuilder from './PrescriptionBuilder'
+import ReportPreviewModal from '../../shared/components/ReportPreviewModal'
 import abhaData from '../../data/abhaFhirMock.json';
 
 // Helper function to format markdown text to HTML
@@ -41,6 +42,8 @@ function PatientDetailView({ patient, onBack }) {
   const [chatMessages, setChatMessages] = useState([])
   const [chatInput, setChatInput] = useState('')
   const [isChatLoading, setIsChatLoading] = useState(false)
+  const [showPDFModal, setShowPDFModal] = useState(false)
+  const [currentReport, setCurrentReport] = useState(null)
 
   // Get patient data from ABHA
   const patientData = abhaData[patient.abhaId]
@@ -159,6 +162,20 @@ function PatientDetailView({ patient, onBack }) {
       e.preventDefault()
       handleChatSubmit()
     }
+  }
+
+  const handleGeneratePDF = async (report) => {
+    try {
+      setCurrentReport(report)
+      setShowPDFModal(true)
+    } catch (error) {
+      alert(`Failed to preview report: ${error.message}`)
+    }
+  }
+
+  const handleClosePDFModal = () => {
+    setShowPDFModal(false)
+    setCurrentReport(null)
   }
 
   return (
@@ -585,6 +602,15 @@ function PatientDetailView({ patient, onBack }) {
                                     <strong className="text-purple-400">Doctor's Notes:</strong> {report.doctorNotes}
                                   </div>
                                 )}
+                                <button
+                                  onClick={() => handleGeneratePDF(report)}
+                                  className="w-full mt-4 px-4 py-3 rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                  </svg>
+                                  <span>Preview Report</span>
+                                </button>
                               </div>
                             ))}
                           </div>
@@ -654,6 +680,14 @@ function PatientDetailView({ patient, onBack }) {
           </div>
         </div>
       )}
+
+      {/* Report Preview Modal */}
+      <ReportPreviewModal
+        isOpen={showPDFModal}
+        onClose={handleClosePDFModal}
+        report={currentReport}
+        patientData={patientData}
+      />
     </div>
   )
 }

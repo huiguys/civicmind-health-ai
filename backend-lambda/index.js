@@ -11,6 +11,9 @@ const {
     handleTranslateSummary,
     handleTextToSpeech
 } = require('./routes/aiRoutes');
+const { generateReportPDF, getCacheStats, clearPDFCache } = require('./controllers/pdfController');
+const { authenticate, authorizeReportAccess } = require('./middleware/auth');
+const { pdfRateLimiter } = require('./middleware/rateLimit');
 
 // Initialize AWS Clients
 const polly = new PollyClient({ region: "ap-south-1" });
@@ -77,6 +80,138 @@ exports.handler = async (event) => {
         if (path === '/api/text-to-speech') {
             const result = await handleTextToSpeech(body);
             return { ...result, headers };
+        }
+
+        // ==========================================
+        // PDF GENERATION
+        // ==========================================
+        
+        if (path === '/api/generate-report-pdf') {
+            // Create mock request/response objects for middleware compatibility
+            const req = {
+                body,
+                headers: event.headers || {},
+                ip: event.requestContext?.identity?.sourceIp || 'unknown',
+                user: null
+            };
+            
+            const res = {
+                statusCode: 200,
+                headers: {},
+                body: null,
+                status: function(code) {
+                    this.statusCode = code;
+                    return this;
+                },
+                json: function(data) {
+                    this.body = JSON.stringify(data);
+                    return this;
+                },
+                send: function(data) {
+                    this.body = data;
+                    return this;
+                },
+                setHeader: function(key, value) {
+                    this.headers[key] = value;
+                }
+            };
+
+            // Apply middleware chain
+            try {
+                // Authentication
+                await new Promise((resolve, reject) => {
+                    authenticate(req, res, (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+
+                // Authorization
+                await new Promise((resolve, reject) => {
+                    authorizeReportAccess(req, res, (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+
+                // Rate limiting
+                await new Promise((resolve, reject) => {
+                    pdfRateLimiter(req, res, (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+
+                // Generate PDF
+                await generateReportPDF(req, res);
+
+                // Return response
+                return {
+                    statusCode: res.statusCode,
+                    headers: { ...headers, ...res.headers },
+                    body: res.body,
+                    isBase64Encoded: res.headers['Content-Type'] === 'application/pdf'
+                };
+            } catch (error) {
+                return {
+                    statusCode: res.statusCode || 500,
+                    headers,
+                    body: res.body || JSON.stringify({ error: error.message })
+                };
+            }
+        }
+
+        // PDF Cache Statistics
+        if (path === '/api/pdf-cache-stats') {
+            const req = { headers: event.headers || {} };
+            const res = {
+                statusCode: 200,
+                body: null,
+                status: function(code) {
+                    this.statusCode = code;
+                    return this;
+                },
+                json: function(data) {
+                    this.body = JSON.stringify(data);
+                    return this;
+                }
+            };
+            
+            await getCacheStats(req, res);
+            
+            return {
+                statusCode: res.statusCode,
+                headers,
+                body: res.body
+            };
+        }
+
+        // Clear PDF Cache
+        if (path === '/api/clear-pdf-cache') {
+            const req = { 
+                body,
+                headers: event.headers || {} 
+            };
+            const res = {
+                statusCode: 200,
+                body: null,
+                status: function(code) {
+                    this.statusCode = code;
+                    return this;
+                },
+                json: function(data) {
+                    this.body = JSON.stringify(data);
+                    return this;
+                }
+            };
+            
+            await clearPDFCache(req, res);
+            
+            return {
+                statusCode: res.statusCode,
+                headers,
+                body: res.body
+            };
         }
 
         // ==========================================

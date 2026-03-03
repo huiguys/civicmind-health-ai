@@ -182,7 +182,7 @@ function AuthLogin({ role, onLoginSuccess, onBack }) {
                       <input
                         type="text"
                         value={abhaId}
-                        onChange={(e) => setAbhaId(e.target.value)}
+                        onChange={(e) => setAbhaId(e.target.value.replace(/\s/g, ''))}
                         placeholder="e.g., 14-1234-5678-9012"
                         className="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-400 transition-all text-base shadow-sm"
                       />

@@ -1,5 +1,7 @@
 # CivicMind Health AI - System Architecture
 
+> **Current Status:** Production-ready prototype with AWS Bedrock (Gemma 3 27B) and AWS Polly integration. All core features implemented and functional.
+
 ## 🏗️ Complete System Architecture
 
 ```mermaid

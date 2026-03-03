@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { usePatient } from '../../shared/context/PatientContext'
 import { useSpeech } from '../../shared/hooks/useSpeech'
+import ReportPreviewModal from '../../shared/components/ReportPreviewModal'
 import abhaData from '../../data/abhaFhirMock.json'
 
 // Helper function to format markdown text to HTML
@@ -30,7 +31,7 @@ const formatMarkdown = (text) => {
 
 function PatientDashboard() {
   const { currentPatient } = usePatient()
-  const { isSpeaking, speak } = useSpeech()
+  const { isSpeaking, isLoading, speak } = useSpeech()
   const [activeTab, setActiveTab] = useState("overview")
   const [messages, setMessages] = useState([
     {
@@ -46,6 +47,8 @@ function PatientDashboard() {
   const [isTranslating, setIsTranslating] = useState(false)
   const [currentLanguage, setCurrentLanguage] = useState('english')
   const [showLanguageMenu, setShowLanguageMenu] = useState(false)
+  const [showPDFModal, setShowPDFModal] = useState(false)
+  const [currentReport, setCurrentReport] = useState(null)
 
   // Get patient data from ABHA - currentPatient IS the ABHA data
   const patientData = currentPatient
@@ -196,6 +199,20 @@ ${patientData.medications && patientData.medications.length > 0
     }
   }
 
+  const handleGeneratePDF = async (report) => {
+    try {
+      setCurrentReport(report)
+      setShowPDFModal(true)
+    } catch (error) {
+      alert(`Failed to preview report: ${error.message}`)
+    }
+  }
+
+  const handleClosePDFModal = () => {
+    setShowPDFModal(false)
+    setCurrentReport(null)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Fixed Header */}
@@ -268,7 +285,7 @@ ${patientData.medications && patientData.medications.length > 0
           <div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-8">
               {/* Left: AI Summary */}
-              <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-xl max-h-[700px] overflow-y-auto custom-scrollbar"
+              <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-xl max-h-[700px] overflow-y-auto custom-scrollbar">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
@@ -346,14 +363,25 @@ ${patientData.medications && patientData.medications.length > 0
                     {/* Listen Button */}
                     <button
                       onClick={toggleSpeech}
-                      disabled={isLoadingSummary || isTranslating}
+                      disabled={isLoadingSummary || isTranslating || isLoading}
                       className={`px-6 py-3 rounded-xl font-bold transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${
                         isSpeaking
                           ? "bg-gradient-to-r from-red-500 to-orange-500 text-white animate-pulse"
+                          : isLoading
+                          ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
                           : "bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:shadow-xl"
                       }`}
                     >
-                      {isSpeaking ? "⏹️ Stop" : "🔊 Listen"}
+                      {isLoading ? (
+                        <span className="flex items-center space-x-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <span>Generating...</span>
+                        </span>
+                      ) : isSpeaking ? (
+                        "⏹️ Stop"
+                      ) : (
+                        "🔊 Listen"
+                      )}
                     </button>
                   </div>
                 </div>
@@ -452,9 +480,18 @@ ${patientData.medications && patientData.medications.length > 0
                       <div className="flex-1">
                         <div className="text-xl font-bold text-blue-900 mb-2">{report.type}</div>
                         <div className="text-sm text-gray-600 mb-3">{report.date} • {report.department}</div>
-                        <div className="text-base text-gray-700 bg-blue-50 p-4 rounded-lg">
+                        <div className="text-base text-gray-700 bg-blue-50 p-4 rounded-lg mb-4">
                           {report.summary}
                         </div>
+                        <button
+                          onClick={() => handleGeneratePDF(report)}
+                          className="w-full px-4 py-3 rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          <span>Preview Report</span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -544,6 +581,14 @@ ${patientData.medications && patientData.medications.length > 0
           </div>
         )}
       </div>
+
+      {/* Report Preview Modal */}
+      <ReportPreviewModal
+        isOpen={showPDFModal}
+        onClose={handleClosePDFModal}
+        report={currentReport}
+        patientData={patientData}
+      />
     </div>
   )
 }
