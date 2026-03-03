@@ -365,7 +365,8 @@ Explore detailed technical documentation:
 **Team CivicMind:**
 - Srinivasa PM
 - Nidith VS
-- Ria Spandana
+- Ria
+- Spandana
 
 **Vision:** Transforming healthcare through AI-powered intelligence, one patient at a time.
 
