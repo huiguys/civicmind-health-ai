@@ -1,5 +1,9 @@
 # CivicMind Health AI Platform
 
+> **📚 Documentation:** [System Architecture](./ARCHITECTURE.md) | [Future Roadmap](./FUTURE_ROADMAP.md)
+
+Enterprise-grade healthcare platform powered by AWS Bedrock AI (Google Gemma 3 27B) and AWS Polly.
+
 ## 🎯 Problem Statement
 
 Healthcare in India faces critical challenges:
@@ -348,6 +352,22 @@ This codebase follows enterprise best practices:
 - Health check endpoints
 - Error monitoring ready
 - Scalable architecture
+
+## 📚 Additional Documentation
+
+Explore detailed technical documentation:
+
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Complete system architecture, ABHA integration workflow, AWS security framework, and compliance details
+- **[FUTURE_ROADMAP.md](./FUTURE_ROADMAP.md)** - Future enhancements including hospital administration AI, doctor co-pilot features, and patient ecosystem innovations
+
+## 👥 Team
+
+**Team CivicMind:**
+- Srinivasa PM
+- Nidith VS
+- Ria Spandana
+
+**Vision:** Transforming healthcare through AI-powered intelligence, one patient at a time.
 
 ## 📄 License
 
