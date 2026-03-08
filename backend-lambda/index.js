@@ -14,6 +14,14 @@ const {
 const { generateReportPDF, getCacheStats, clearPDFCache } = require('./controllers/pdfController');
 const { authenticate, authorizeReportAccess } = require('./middleware/auth');
 const { pdfRateLimiter } = require('./middleware/rateLimit');
+const {
+    createChatSession,
+    addMessageToSession,
+    getPatientChatSessions,
+    getChatSession,
+    updateSessionTitle,
+    archiveChatSession
+} = require('./services/dynamoDBService');
 
 // Initialize AWS Clients
 const polly = new PollyClient({ region: "ap-south-1" });
@@ -80,6 +88,108 @@ exports.handler = async (event) => {
         if (path === '/api/text-to-speech') {
             const result = await handleTextToSpeech(body);
             return { ...result, headers };
+        }
+
+        // ==========================================
+        // CHAT HISTORY (DynamoDB)
+        // ==========================================
+        
+        // Create new chat session
+        if (path === '/api/chat-history/sessions' && event.httpMethod === 'POST') {
+            const { patientId, title } = body;
+            if (!patientId) {
+                return {
+                    statusCode: 400,
+                    headers,
+                    body: JSON.stringify({ error: 'Patient ID is required' })
+                };
+            }
+            const session = await createChatSession(patientId, title);
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify(session)
+            };
+        }
+
+        // Get all chat sessions for a patient
+        if (path.match(/^\/api\/chat-history\/sessions\/[^/]+$/) && event.httpMethod === 'GET') {
+            const patientId = path.split('/').pop();
+            const sessions = await getPatientChatSessions(patientId);
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify(sessions)
+            };
+        }
+
+        // Get specific chat session
+        if (path.match(/^\/api\/chat-history\/session\/[^/]+$/) && event.httpMethod === 'GET') {
+            const sessionId = path.split('/').pop();
+            const session = await getChatSession(sessionId);
+            if (!session) {
+                return {
+                    statusCode: 404,
+                    headers,
+                    body: JSON.stringify({ error: 'Session not found' })
+                };
+            }
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify(session)
+            };
+        }
+
+        // Add message to session
+        if (path.match(/^\/api\/chat-history\/session\/[^/]+\/message$/) && event.httpMethod === 'POST') {
+            const pathParts = path.split('/');
+            const sessionId = pathParts[pathParts.length - 2];
+            const { role, content } = body;
+            if (!role || !content) {
+                return {
+                    statusCode: 400,
+                    headers,
+                    body: JSON.stringify({ error: 'Role and content are required' })
+                };
+            }
+            const result = await addMessageToSession(sessionId, { role, content });
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify(result)
+            };
+        }
+
+        // Update session title
+        if (path.match(/^\/api\/chat-history\/session\/[^/]+\/title$/) && event.httpMethod === 'PUT') {
+            const pathParts = path.split('/');
+            const sessionId = pathParts[pathParts.length - 2];
+            const { title } = body;
+            if (!title) {
+                return {
+                    statusCode: 400,
+                    headers,
+                    body: JSON.stringify({ error: 'Title is required' })
+                };
+            }
+            const result = await updateSessionTitle(sessionId, title);
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify(result)
+            };
+        }
+
+        // Archive session
+        if (path.match(/^\/api\/chat-history\/session\/[^/]+$/) && event.httpMethod === 'DELETE') {
+            const sessionId = path.split('/').pop();
+            const result = await archiveChatSession(sessionId);
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify(result)
+            };
         }
 
         // ==========================================
