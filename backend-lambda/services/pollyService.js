@@ -1,10 +1,8 @@
 const { PollyClient, SynthesizeSpeechCommand } = require("@aws-sdk/client-polly");
-const awsConfig = require('../config/aws.config');
 
-// Initialize Polly Client
+// Initialize Polly Client - use Lambda's IAM role (no explicit credentials needed)
 const polly = new PollyClient({
-  region: awsConfig.region,
-  credentials: awsConfig.credentials
+  region: process.env.AWS_REGION || 'us-east-1'
 });
 
 /**
