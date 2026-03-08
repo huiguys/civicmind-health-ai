@@ -28,3 +28,6 @@ backend-lambda/cache/pdfs/*.pdf
 
 # Log files
 backend-lambda/logs/*.log
+
+# Kiro AI specs (development only)
+.kiro/

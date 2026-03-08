@@ -55,6 +55,8 @@ function PatientDashboard() {
   // Chat History State
   const [currentSessionId, setCurrentSessionId] = useState(null)
   const [isLoadingSession, setIsLoadingSession] = useState(false)
+  const [hasLoadedExistingSessions, setHasLoadedExistingSessions] = useState(false)
+  const [sidebarRefreshTrigger, setSidebarRefreshTrigger] = useState(0)
 
   // Get patient data from ABHA - currentPatient IS the ABHA data
   const patientData = currentPatient
@@ -166,8 +168,52 @@ ${patientData.medications && patientData.medications.length > 0
   }
 
   // Chat History Functions
+  const generateConversationTitle = async (messages) => {
+    try {
+      // Get first user message for context
+      const firstUserMsg = messages.find(m => m.role === 'user')
+      if (!firstUserMsg) return 'New Conversation'
+      
+      const response = await fetch('http://localhost:3001/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: `Generate a short 3-5 word title for this conversation. User asked: "${firstUserMsg.text}". Reply with ONLY the title, nothing else.`,
+          patientData: patientData
+        })
+      })
+
+      const data = await response.json()
+      // Clean up the title (remove quotes, extra text)
+      let title = data.reply.replace(/['"]/g, '').trim()
+      // Take first line if multiple lines
+      title = title.split('\n')[0]
+      // Limit to 50 characters
+      if (title.length > 50) {
+        title = title.substring(0, 47) + '...'
+      }
+      return title || 'Health Question'
+    } catch (error) {
+      console.error('Error generating title:', error)
+      return 'Health Question'
+    }
+  }
+
   const createNewChatSession = async () => {
     try {
+      // Update title in background (don't wait for it)
+      if (currentSessionId && messages.length > 1) {
+        // Fire and forget - update title in background
+        generateConversationTitle(messages).then(title => {
+          chatHistoryApi.updateTitle(currentSessionId, title).catch(err => 
+            console.error('Error updating title:', err)
+          )
+        })
+      }
+
+      // Immediately create new session (don't wait for title update)
       const session = await chatHistoryApi.createSession(abhaId, 'New Conversation')
       setCurrentSessionId(session.sessionId)
       setMessages([
@@ -176,6 +222,9 @@ ${patientData.medications && patientData.medications.length > 0
           text: `Hello ${currentPatient?.name || 'there'}! 👋 I am your CivicMind AI Health Companion. I know your complete medical history and can help you with health questions. How can I help you today?`
         }
       ])
+      
+      // Refresh sidebar after a short delay to show updated list
+      setTimeout(() => setSidebarRefreshTrigger(prev => prev + 1), 500)
     } catch (error) {
       console.error('Error creating chat session:', error)
     }
@@ -202,6 +251,30 @@ ${patientData.medications && patientData.medications.length > 0
     }
   }
 
+  const loadMostRecentSession = async () => {
+    try {
+      const sessions = await chatHistoryApi.getSessions(abhaId)
+      // Filter sessions with messages and get most recent
+      const sessionsWithMessages = sessions.filter(s => s.messages && s.messages.length > 0 && s.isActive)
+      
+      if (sessionsWithMessages.length > 0) {
+        // Sort by updatedAt and get most recent
+        const mostRecent = sessionsWithMessages.sort((a, b) => 
+          new Date(b.updatedAt) - new Date(a.updatedAt)
+        )[0]
+        
+        await loadChatSession(mostRecent.sessionId)
+      } else {
+        // No existing sessions, create new one
+        await createNewChatSession()
+      }
+    } catch (error) {
+      console.error('Error loading recent session:', error)
+      // Fallback: create new session
+      await createNewChatSession()
+    }
+  }
+
   const saveMessageToSession = async (role, content) => {
     if (!currentSessionId) return
     
@@ -212,12 +285,13 @@ ${patientData.medications && patientData.medications.length > 0
     }
   }
 
-  // Initialize first session on mount
+  // Load existing sessions on mount (only once)
   useEffect(() => {
-    if (abhaId && !currentSessionId) {
-      createNewChatSession()
+    if (abhaId && !hasLoadedExistingSessions && activeTab === 'chat') {
+      setHasLoadedExistingSessions(true)
+      loadMostRecentSession()
     }
-  }, [abhaId])
+  }, [abhaId, activeTab, hasLoadedExistingSessions])
 
   const sendMessage = async () => {
     if (!inputValue.trim()) return
@@ -581,6 +655,7 @@ ${patientData.medications && patientData.medications.length > 0
               currentSessionId={currentSessionId}
               onSelectSession={loadChatSession}
               onNewChat={createNewChatSession}
+              refreshTrigger={sidebarRefreshTrigger}
             />
 
             {/* Chat Area */}

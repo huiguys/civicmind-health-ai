@@ -1452,6 +1452,171 @@ async function logAuditEvent(event) {
 
 ---
 
+## 💬 Chat History Architecture (AWS DynamoDB)
+
+### Overview
+
+CivicMind implements persistent chat history using AWS DynamoDB, allowing patients to save and resume conversations with the AI health companion across sessions.
+
+### DynamoDB Table Design
+
+```javascript
+// Table: CivicMindChatHistory
+{
+  "TableName": "CivicMindChatHistory",
+  "KeySchema": [
+    { "AttributeName": "sessionId", "KeyType": "HASH" }  // Partition key
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "sessionId", "AttributeType": "S" },
+    { "AttributeName": "patientId", "AttributeType": "S" },
+    { "AttributeName": "createdAt", "AttributeType": "N" }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "PatientIdIndex",
+      "KeySchema": [
+        { "AttributeName": "patientId", "KeyType": "HASH" },
+        { "AttributeName": "createdAt", "KeyType": "RANGE" }
+      ],
+      "Projection": { "ProjectionType": "ALL" }
+    }
+  ],
+  "BillingMode": "PAY_PER_REQUEST"
+}
+```
+
+### Data Model
+
+```javascript
+// Chat Session Document
+{
+  "sessionId": "uuid-v4",           // Unique session identifier
+  "patientId": "14-1234-5678-9012", // ABHA ID
+  "title": "AI-generated title",    // Smart title from first message
+  "messages": [
+    {
+      "role": "user",
+      "content": "What does my blood sugar report mean?",
+      "timestamp": 1709856000000
+    },
+    {
+      "role": "assistant", 
+      "content": "Your blood sugar is slightly elevated...",
+      "timestamp": 1709856003000
+    }
+  ],
+  "createdAt": 1709856000000,       // Unix timestamp
+  "updatedAt": 1709856120000,       // Last message timestamp
+  "messageCount": 8                  // Total messages in session
+}
+```
+
+### Key Features
+
+1. **AI-Generated Titles**: First user message is automatically summarized by Gemma 3 27B to create a meaningful conversation title
+2. **Session Management**: Each conversation gets a unique UUID, allowing multiple concurrent chats
+3. **Patient Isolation**: Global Secondary Index on patientId ensures fast retrieval of all conversations for a specific patient
+4. **Auto-Persistence**: Messages are saved in real-time as the conversation progresses
+5. **Smart Filtering**: Sidebar only displays conversations with at least 1 message (filters empty sessions)
+6. **Auto-Load**: Most recent conversation loads automatically on page refresh
+
+### Data Flow
+
+```mermaid
+sequenceDiagram
+    participant UI as Patient Dashboard
+    participant API as Backend API
+    participant DDB as DynamoDB
+    participant AI as AWS Bedrock
+
+    UI->>API: POST /api/chat-history/save
+    API->>AI: Generate title from first message
+    AI->>API: Return smart title
+    API->>DDB: PutItem (sessionId, patientId, messages, title)
+    DDB->>API: Success
+    API->>UI: Session saved
+
+    UI->>API: GET /api/chat-history/:patientId
+    API->>DDB: Query PatientIdIndex
+    DDB->>API: Return all sessions (sorted by createdAt)
+    API->>UI: Display conversation list
+
+    UI->>API: GET /api/chat-history/session/:sessionId
+    API->>DDB: GetItem (sessionId)
+    DDB->>API: Return full conversation
+    API->>UI: Load messages
+```
+
+### API Endpoints
+
+```javascript
+// Save or update chat session
+POST /api/chat-history/save
+{
+  "sessionId": "uuid",
+  "patientId": "14-1234-5678-9012",
+  "messages": [...],
+  "title": "Blood sugar questions" // Optional, AI-generated if not provided
+}
+
+// Get all sessions for a patient
+GET /api/chat-history/:patientId
+Response: [
+  {
+    "sessionId": "uuid-1",
+    "title": "Blood sugar questions",
+    "createdAt": 1709856000000,
+    "messageCount": 8
+  },
+  {
+    "sessionId": "uuid-2", 
+    "title": "Medication side effects",
+    "createdAt": 1709842000000,
+    "messageCount": 5
+  }
+]
+
+// Get specific session
+GET /api/chat-history/session/:sessionId
+Response: {
+  "sessionId": "uuid-1",
+  "patientId": "14-1234-5678-9012",
+  "title": "Blood sugar questions",
+  "messages": [...],
+  "createdAt": 1709856000000,
+  "updatedAt": 1709856120000
+}
+
+// Delete session
+DELETE /api/chat-history/session/:sessionId
+```
+
+### Performance Optimizations
+
+- **Pay-per-request billing**: No provisioned capacity needed, scales automatically
+- **Global Secondary Index**: Fast queries by patientId without scanning entire table
+- **Efficient queries**: Only fetch session metadata for sidebar (not full message history)
+- **Lazy loading**: Full conversation loaded only when user clicks on it
+- **Client-side caching**: Active conversation cached in React state
+
+### Security Considerations
+
+- **Patient Isolation**: Each patient can only access their own chat history (validated by ABHA ID)
+- **Encryption at Rest**: DynamoDB automatically encrypts all data using AWS-managed keys
+- **Access Control**: IAM policies restrict Lambda functions to specific table operations
+- **Audit Logging**: All DynamoDB operations logged to CloudWatch for compliance
+- **Data Retention**: Conversations can be configured to auto-delete after X days (HIPAA compliance)
+
+### Cost Efficiency
+
+- **Storage**: ~1KB per message, ~10KB per session average
+- **Estimated cost**: $0.25 per million read/write operations
+- **For 10,000 patients with 50 conversations each**: ~$12.50/month
+- **Scales to zero**: No cost when not in use
+
+---
+
 ## 🛡️ Security Summary
 
 ### What Makes CivicMind Secure?

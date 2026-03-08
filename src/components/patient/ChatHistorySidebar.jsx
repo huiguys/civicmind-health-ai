@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react';
 import { chatHistoryApi } from '../../api/chatHistoryApi';
 
-function ChatHistorySidebar({ patientId, currentSessionId, onSelectSession, onNewChat }) {
+function ChatHistorySidebar({ patientId, currentSessionId, onSelectSession, onNewChat, refreshTrigger }) {
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     loadSessions();
-  }, [patientId]);
+  }, [patientId, refreshTrigger]);
 
   const loadSessions = async () => {
     try {
       setIsLoading(true);
       const data = await chatHistoryApi.getSessions(patientId);
-      // Filter only active sessions and sort by most recent
+      // Filter only active sessions with messages and sort by most recent
       const activeSessions = data
-        .filter(s => s.isActive)
+        .filter(s => s.isActive && s.messages && s.messages.length > 0)
         .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
       setSessions(activeSessions);
     } catch (error) {

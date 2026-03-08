@@ -4,6 +4,35 @@
 
 ---
 
+## ✅ Recently Completed Features
+
+### Persistent Chat History with AWS DynamoDB
+
+**Status:** ✅ Implemented and deployed
+
+**What We Built:**
+- AWS DynamoDB table for storing patient conversations
+- AI-generated conversation titles using first user message
+- Sidebar showing all past conversations with smart filtering
+- Auto-load most recent conversation on page refresh
+- Instant "New Chat" button with background title generation
+- Session management with unique UUIDs
+
+**Technical Implementation:**
+- DynamoDB table: `CivicMindChatHistory`
+- Global Secondary Index on `patientId` for fast queries
+- Pay-per-request billing for cost efficiency
+- Real-time message persistence
+- Client-side caching for active conversations
+
+**Impact:**
+- Patients can resume health conversations anytime
+- Complete conversation history preserved
+- Better continuity of care
+- Improved patient engagement
+
+---
+
 ## 🏥 Set 1: Hospital Administration & On-Premise AI
 
 The goal is to optimize hospital resources, reduce wait times, and eliminate administrative bottlenecks before the patient even sees the doctor.
