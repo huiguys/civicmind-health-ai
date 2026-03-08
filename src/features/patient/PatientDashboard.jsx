@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { usePatient } from '../../shared/context/PatientContext'
 import { useSpeech } from '../../shared/hooks/useSpeech'
 import ReportPreviewModal from '../../shared/components/ReportPreviewModal'
+import ChatHistorySidebar from '../../components/patient/ChatHistorySidebar'
+import { chatHistoryApi } from '../../api/chatHistoryApi'
 import abhaData from '../../data/abhaFhirMock.json'
 
 // Helper function to format markdown text to HTML
@@ -49,6 +51,10 @@ function PatientDashboard() {
   const [showLanguageMenu, setShowLanguageMenu] = useState(false)
   const [showPDFModal, setShowPDFModal] = useState(false)
   const [currentReport, setCurrentReport] = useState(null)
+  
+  // Chat History State
+  const [currentSessionId, setCurrentSessionId] = useState(null)
+  const [isLoadingSession, setIsLoadingSession] = useState(false)
 
   // Get patient data from ABHA - currentPatient IS the ABHA data
   const patientData = currentPatient
@@ -159,6 +165,60 @@ ${patientData.medications && patientData.medications.length > 0
     setShowLanguageMenu(false)
   }
 
+  // Chat History Functions
+  const createNewChatSession = async () => {
+    try {
+      const session = await chatHistoryApi.createSession(abhaId, 'New Conversation')
+      setCurrentSessionId(session.sessionId)
+      setMessages([
+        {
+          role: 'assistant',
+          text: `Hello ${currentPatient?.name || 'there'}! 👋 I am your CivicMind AI Health Companion. I know your complete medical history and can help you with health questions. How can I help you today?`
+        }
+      ])
+    } catch (error) {
+      console.error('Error creating chat session:', error)
+    }
+  }
+
+  const loadChatSession = async (sessionId) => {
+    try {
+      setIsLoadingSession(true)
+      const session = await chatHistoryApi.getSession(sessionId)
+      setCurrentSessionId(sessionId)
+      
+      // Convert stored messages to UI format
+      const loadedMessages = session.messages.map(msg => ({
+        role: msg.role,
+        text: msg.content
+      }))
+      
+      setMessages(loadedMessages)
+    } catch (error) {
+      console.error('Error loading chat session:', error)
+      alert('Failed to load conversation')
+    } finally {
+      setIsLoadingSession(false)
+    }
+  }
+
+  const saveMessageToSession = async (role, content) => {
+    if (!currentSessionId) return
+    
+    try {
+      await chatHistoryApi.addMessage(currentSessionId, role, content)
+    } catch (error) {
+      console.error('Error saving message:', error)
+    }
+  }
+
+  // Initialize first session on mount
+  useEffect(() => {
+    if (abhaId && !currentSessionId) {
+      createNewChatSession()
+    }
+  }, [abhaId])
+
   const sendMessage = async () => {
     if (!inputValue.trim()) return
 
@@ -167,6 +227,9 @@ ${patientData.medications && patientData.medications.length > 0
     const currentInput = inputValue
     setInputValue("")
     setIsChatLoading(true)
+
+    // Save user message to DynamoDB
+    await saveMessageToSession('user', currentInput)
 
     try {
       const response = await fetch('http://localhost:3001/api/chat', {
@@ -183,10 +246,14 @@ ${patientData.medications && patientData.medications.length > 0
       const data = await response.json()
       const aiMessage = { role: 'assistant', text: data.reply }
       setMessages(prev => [...prev, aiMessage])
+      
+      // Save AI response to DynamoDB
+      await saveMessageToSession('assistant', data.reply)
     } catch (error) {
       console.error('Chat error:', error)
       const errorMessage = { role: 'assistant', text: '❌ Sorry, I encountered an error. Please try again.' }
       setMessages(prev => [...prev, errorMessage])
+      await saveMessageToSession('assistant', errorMessage.text)
     } finally {
       setIsChatLoading(false)
     }
@@ -507,76 +574,83 @@ ${patientData.medications && patientData.medications.length > 0
         )}
 
         {activeTab === "chat" && (
-          <div className="p-8">
-            <div className="bg-white rounded-2xl shadow-xl">
-              <div className="p-8 space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar">
-              {messages.map((msg, idx) => (
-                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
-                  {msg.role === 'assistant' && (
-                    <div className="flex items-start space-x-3 max-w-[75%]">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg">
-                        🤖
-                      </div>
-                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-2xl p-5 shadow-lg">
-                        <p className="text-gray-800 text-base leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                      </div>
-                    </div>
-                  )}
-                  {msg.role === 'user' && (
-                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl p-5 max-w-[75%] shadow-lg">
-                      {msg.type === 'image' ? (
-                        <div className="bg-white/20 rounded-lg p-4 text-center">
-                          <div className="text-4xl mb-2">📷</div>
-                          <div className="text-xs">Food Image</div>
-                        </div>
-                      ) : (
-                        <p className="text-base">{msg.text}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-              {isChatLoading && (
-                <div className="flex justify-start animate-fadeIn">
-                  <div className="flex items-center space-x-3 bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl px-6 py-4 shadow-lg">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
-                    <div className="text-sm text-purple-700 font-medium">AI is thinking...</div>
+          <div className="flex h-[calc(100vh-200px)]">
+            {/* Chat History Sidebar */}
+            <ChatHistorySidebar
+              patientId={abhaId}
+              currentSessionId={currentSessionId}
+              onSelectSession={loadChatSession}
+              onNewChat={createNewChatSession}
+            />
+
+            {/* Chat Area */}
+            <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-xl m-8 ml-4">
+              {isLoadingSession ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600 text-lg">Loading conversation...</p>
                   </div>
                 </div>
-              )}
-            </div>
+              ) : (
+                <>
+                  {/* Messages Area */}
+                  <div className="flex-1 p-8 space-y-4 overflow-y-auto custom-scrollbar">
+                    {messages.map((msg, idx) => (
+                      <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
+                        {msg.role === 'assistant' && (
+                          <div className="flex items-start space-x-3 max-w-[75%]">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg">
+                              🤖
+                            </div>
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-2xl p-5 shadow-lg">
+                              <p className="text-gray-800 text-base leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                            </div>
+                          </div>
+                        )}
+                        {msg.role === 'user' && (
+                          <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl p-5 max-w-[75%] shadow-lg">
+                            <p className="text-base">{msg.text}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {isChatLoading && (
+                      <div className="flex justify-start animate-fadeIn">
+                        <div className="flex items-center space-x-3 bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl px-6 py-4 shadow-lg">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+                          <div className="text-sm text-purple-700 font-medium">AI is thinking...</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-              <div className="bg-gradient-to-r from-gray-50 to-blue-50 border-t-2 border-gray-200 p-6 rounded-b-2xl">
-                {/* Coming Soon Banner */}
-                <div className="mb-3 bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-300 rounded-xl p-3 text-center">
-                  <p className="text-sm text-purple-800">
-                    <span className="font-bold">📷 Food Image Analysis Coming Soon!</span>
-                    <span className="ml-2">Requires vision-capable AI model upgrade</span>
-                  </p>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Ask about your health or diet..."
-                    className="flex-1 px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-400 shadow-lg transition-all duration-200 text-base"
-                  />
-                  <button
-                    onClick={sendMessage}
-                    disabled={!inputValue.trim() || isChatLoading}
-                    className={`px-8 py-4 rounded-xl font-bold transition-all duration-200 transform hover:scale-105 shadow-lg ${
-                      inputValue.trim() && !isChatLoading
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
-                  >
-                    Send
-                  </button>
-                </div>
-              </div>
+                  {/* Input Area */}
+                  <div className="bg-gradient-to-r from-gray-50 to-blue-50 border-t-2 border-gray-200 p-6 rounded-b-2xl">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Ask about your health or diet..."
+                        className="flex-1 px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-400 shadow-lg transition-all duration-200 text-base"
+                      />
+                      <button
+                        onClick={sendMessage}
+                        disabled={!inputValue.trim() || isChatLoading}
+                        className={`px-8 py-4 rounded-xl font-bold transition-all duration-200 transform hover:scale-105 shadow-lg ${
+                          inputValue.trim() && !isChatLoading
+                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                      >
+                        Send
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
