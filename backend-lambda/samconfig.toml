@@ -1,0 +1,16 @@
+version = 0.1
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "civicmind-backend"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-tqr9xvlcqofa"
+s3_prefix = "civicmind-backend"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = false
+image_repositories = []
+
+[default.global.parameters]
+region = "us-east-1"

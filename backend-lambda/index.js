@@ -24,7 +24,7 @@ const {
 } = require('./services/dynamoDBService');
 
 // Initialize AWS Clients
-const polly = new PollyClient({ region: "ap-south-1" });
+const polly = new PollyClient({ region: "us-east-1" });
 
 exports.handler = async (event) => {
     const path = event.rawPath || event.path;

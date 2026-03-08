@@ -1,9 +1,9 @@
-const API_BASE_URL = 'http://localhost:3001/api';
+import { API_BASE_URL } from '../config/constants';
 
 export const chatHistoryApi = {
   // Create a new chat session
   createSession: async (patientId, title = 'New Conversation') => {
-    const response = await fetch(`${API_BASE_URL}/chat-history/sessions`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat-history/sessions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ export const chatHistoryApi = {
 
   // Get all chat sessions for a patient
   getSessions: async (patientId) => {
-    const response = await fetch(`${API_BASE_URL}/chat-history/sessions/${patientId}`);
+    const response = await fetch(`${API_BASE_URL}/api/chat-history/sessions/${patientId}`);
 
     if (!response.ok) {
       throw new Error('Failed to get chat sessions');
@@ -31,7 +31,7 @@ export const chatHistoryApi = {
 
   // Get a specific chat session
   getSession: async (sessionId) => {
-    const response = await fetch(`${API_BASE_URL}/chat-history/session/${sessionId}`);
+    const response = await fetch(`${API_BASE_URL}/api/chat-history/session/${sessionId}`);
 
     if (!response.ok) {
       throw new Error('Failed to get chat session');
@@ -42,7 +42,7 @@ export const chatHistoryApi = {
 
   // Add a message to a session
   addMessage: async (sessionId, role, content) => {
-    const response = await fetch(`${API_BASE_URL}/chat-history/session/${sessionId}/message`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat-history/session/${sessionId}/message`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export const chatHistoryApi = {
 
   // Update session title
   updateTitle: async (sessionId, title) => {
-    const response = await fetch(`${API_BASE_URL}/chat-history/session/${sessionId}/title`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat-history/session/${sessionId}/title`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export const chatHistoryApi = {
 
   // Archive a session
   archiveSession: async (sessionId) => {
-    const response = await fetch(`${API_BASE_URL}/chat-history/session/${sessionId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat-history/session/${sessionId}`, {
       method: 'DELETE'
     });
 

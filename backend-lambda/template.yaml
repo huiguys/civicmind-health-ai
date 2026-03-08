@@ -1,16 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: CivicMind Health AI Backend
+Description: CivicMind Health AI Backend - Production Deployment
 
 Globals:
   Function:
-    Timeout: 30
-    MemorySize: 512
+    Timeout: 60
+    MemorySize: 1024
     Runtime: nodejs18.x
     Environment:
       Variables:
-        AWS_REGION: us-east-1
-        BEDROCK_MODEL_ID: google.gemma-3-27b-it
+        BEDROCK_MODEL_ID: google.gemma-3-12b-it
+        NODE_ENV: production
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
+      MaxAge: "'600'"
 
 Resources:
   CivicMindAPI:
@@ -18,6 +24,7 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: index.handler
+      Description: CivicMind Health AI API Handler
       Events:
         ApiRoot:
           Type: Api
@@ -41,11 +48,38 @@ Resources:
             Action:
               - polly:SynthesizeSpeech
             Resource: '*'
+          - Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:GetItem
+              - dynamodb:UpdateItem
+              - dynamodb:Query
+              - dynamodb:Scan
+            Resource:
+              - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/CivicMindChatHistory'
+              - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/CivicMindChatHistory/index/*'
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: '*'
 
 Outputs:
   ApiUrl:
-    Description: "API Gateway endpoint URL"
+    Description: "API Gateway endpoint URL for Prod stage"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Export:
+      Name: !Sub "${AWS::StackName}-ApiUrl"
+  
   FunctionArn:
     Description: "Lambda Function ARN"
     Value: !GetAtt CivicMindAPI.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-FunctionArn"
+  
+  FunctionName:
+    Description: "Lambda Function Name"
+    Value: !Ref CivicMindAPI
+    Export:
+      Name: !Sub "${AWS::StackName}-FunctionName"

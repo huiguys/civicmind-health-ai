@@ -1,10 +1,12 @@
 # CivicMind Health AI Platform
 
-> **📚 Documentation:** [System Architecture](./ARCHITECTURE.md) | [Future Roadmap](./FUTURE_ROADMAP.md) | [Deployment Guide](./DEPLOYMENT.md)
+> **📚 Documentation:** [System Architecture](./ARCHITECTURE.md) | [Future Roadmap](./FUTURE_ROADMAP.md) | [Deployment Guide](./DEPLOY.md)
 
 > **🎓 Hackathon Project:** AI for Bharat Hackathon | **Status:** Prototype with Production-Ready Architecture
 
-Enterprise-grade healthcare platform powered by AWS Bedrock AI (Google Gemma 3 27B), AWS Polly, and AWS DynamoDB.
+> **🌐 Live Demo:** [https://d23719i3vbddmf.cloudfront.net](https://d23719i3vbddmf.cloudfront.net)
+
+Enterprise-grade healthcare platform powered by AWS Bedrock AI (Google Gemma 3 12B), AWS Polly, and AWS DynamoDB.
 
 ## ⚠️ Current Implementation Status
 
@@ -16,11 +18,12 @@ Enterprise-grade healthcare platform powered by AWS Bedrock AI (Google Gemma 3 2
 - Our architecture is production-ready and ABHA-compatible
 
 **What's Real:**
-- ✅ AWS Bedrock AI (Google Gemma 3 27B) - Real AI processing
+- ✅ AWS Bedrock AI (Google Gemma 3 12B) - Real AI processing
 - ✅ AWS Polly - Real text-to-speech in 6 Indian languages
 - ✅ AWS DynamoDB - Real persistent chat history storage
 - ✅ Production-grade architecture following ABDM guidelines
 - ✅ FHIR R4 compliant data structure
+- ✅ CloudFront CDN - Global content delivery for universal access
 
 **Path to Production:** Integrating with real ABHA API requires only updating the data fetching layer (5-10 lines of code). All AI processing, security, and business logic remain unchanged. See [ARCHITECTURE.md](./ARCHITECTURE.md#-abha-network-integration-production-implementation) for detailed integration plan.
 
@@ -195,11 +198,12 @@ const patientData = await response.json(); // Same FHIR R4 format
 
 | Component | Current Status | Production Ready |
 |-----------|----------------|------------------|
-| **AI Processing** | ✅ Real (AWS Bedrock Gemma 3 27B) | ✅ Yes |
+| **AI Processing** | ✅ Real (AWS Bedrock Gemma 3 12B) | ✅ Yes |
 | **Translation** | ✅ Real (AI-powered, 6 languages) | ✅ Yes |
 | **Voice** | ✅ Real (AWS Polly neural voices) | ✅ Yes |
 | **Chat History** | ✅ Real (AWS DynamoDB) | ✅ Yes |
 | **Architecture** | ✅ Real (FHIR R4 compliant) | ✅ Yes |
+| **CDN Delivery** | ✅ Real (CloudFront global CDN) | ✅ Yes |
 | **ABHA Data Fetch** | ⚠️ Mock (FHIR R4 format) | 🔄 Pending ABDM certification |
 | **OTP Verification** | ⚠️ Simulated | 🔄 Pending ABHA API access |
 
@@ -224,6 +228,13 @@ const patientData = await response.json(); // Same FHIR R4 format
 For detailed technical documentation on ABHA integration, see [ARCHITECTURE.md](./ARCHITECTURE.md#-abha-network-integration-production-implementation).
 
 ## 🚀 Quick Start
+
+### Live Demo
+**Access the deployed application:** [https://d23719i3vbddmf.cloudfront.net](https://d23719i3vbddmf.cloudfront.net)
+
+**Test Credentials:**
+- Patient ABHA ID: `14-1234-5678-9012`
+- Doctor Login: `demo@civicmind.health`
 
 ### Prerequisites
 - Node.js 18+
@@ -332,12 +343,14 @@ LOG_LEVEL=info
 - CORS enabled for cross-origin requests
 
 **AI Models:**
-- **Gemma 3 27B** - Health summaries, translations, chat, diagnostics
+- **Gemma 3 12B** - Health summaries, translations, chat, diagnostics
 - **AWS Polly** - Joanna (English), Aditi (Hindi) voices
 
 **Infrastructure:**
 - AWS SDK v3
-- Lambda-compatible architecture
+- AWS Lambda + API Gateway
+- AWS S3 + CloudFront CDN
+- AWS DynamoDB
 - Environment-based configuration
 
 ## 📝 API Endpoints
@@ -405,12 +418,25 @@ This codebase follows enterprise best practices:
 
 ## 🚀 Deployment Ready
 
+**Live Application:**
+- **Frontend URL:** [https://d23719i3vbddmf.cloudfront.net](https://d23719i3vbddmf.cloudfront.net)
+- **Backend API:** `https://araw74z5hf.execute-api.us-east-1.amazonaws.com/Prod/`
+
+**Deployment Architecture:**
+- Frontend: AWS S3 + CloudFront CDN (global distribution)
+- Backend: AWS Lambda + API Gateway (serverless)
+- Database: AWS DynamoDB (NoSQL, serverless)
+- AI: AWS Bedrock (Gemma 3 12B)
+- Voice: AWS Polly (Neural TTS)
+
+**Features:**
 - Environment-based configuration
 - Lambda-compatible backend
 - Production build scripts
 - Health check endpoints
 - Error monitoring ready
 - Scalable architecture
+- Global CDN delivery
 
 ## 📚 Additional Documentation
 

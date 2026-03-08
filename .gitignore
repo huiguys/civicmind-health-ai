@@ -31,3 +31,10 @@ backend-lambda/logs/*.log
 
 # Kiro AI specs (development only)
 .kiro/
+
+# AWS SAM build artifacts
+backend-lambda/.aws-sam/
+
+# Temporary files
+cloudfront-config.json
+api-url.txt

@@ -1,0 +1,21 @@
+﻿CivicMind Health AI - Deployment Information
+=============================================
+
+🌐 LIVE APPLICATION URL (Works on ALL devices - Mobile, Mac, Windows):
+https://d23719i3vbddmf.cloudfront.net
+
+Backend API:
+https://araw74z5hf.execute-api.us-east-1.amazonaws.com/Prod/
+
+Deployment Architecture:
+- Frontend: AWS S3 + CloudFront CDN
+- Backend: AWS Lambda + API Gateway
+- Database: AWS DynamoDB
+- AI: AWS Bedrock (Gemma 3 12B)
+- Voice: AWS Polly
+
+Test Credentials:
+- Patient ABHA ID: 14-1234-5678-9012
+- Doctor Login: demo@civicmind.health
+
+Share the CloudFront URL with hackathon judges - it works everywhere!

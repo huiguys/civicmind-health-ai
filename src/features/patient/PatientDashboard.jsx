@@ -5,6 +5,7 @@ import ReportPreviewModal from '../../shared/components/ReportPreviewModal'
 import ChatHistorySidebar from '../../components/patient/ChatHistorySidebar'
 import { chatHistoryApi } from '../../api/chatHistoryApi'
 import abhaData from '../../data/abhaFhirMock.json'
+import { API_BASE_URL } from '../../config/constants'
 
 // Helper function to format markdown text to HTML
 const formatMarkdown = (text) => {
@@ -75,7 +76,7 @@ function PatientDashboard() {
       setIsLoadingSummary(true)
       try {
         console.log('📤 Requesting health summary for:', patientData.name)
-        const response = await fetch('http://localhost:3001/api/patient-health-summary', {
+        const response = await fetch(`${API_BASE_URL}/api/patient-health-summary`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -116,7 +117,7 @@ ${patientData.medications && patientData.medications.length > 0
 - Stay physically active
 - Get regular check-ups
 
-*Note: AI summary unavailable. Please ensure backend is running on port 3001.*`)
+*Note: AI summary unavailable. Please check your connection and try again.*`)
       } finally {
         setIsLoadingSummary(false)
       }
@@ -135,7 +136,7 @@ ${patientData.medications && patientData.medications.length > 0
     setShowLanguageMenu(false)
     
     try {
-      const response = await fetch('http://localhost:3001/api/translate-summary', {
+      const response = await fetch(`${API_BASE_URL}/api/translate-summary`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +175,7 @@ ${patientData.medications && patientData.medications.length > 0
       const firstUserMsg = messages.find(m => m.role === 'user')
       if (!firstUserMsg) return 'New Conversation'
       
-      const response = await fetch('http://localhost:3001/api/chat', {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -306,7 +307,7 @@ ${patientData.medications && patientData.medications.length > 0
     await saveMessageToSession('user', currentInput)
 
     try {
-      const response = await fetch('http://localhost:3001/api/chat', {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

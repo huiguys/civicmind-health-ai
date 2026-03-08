@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import PrescriptionBuilder from './PrescriptionBuilder'
 import ReportPreviewModal from '../../shared/components/ReportPreviewModal'
 import abhaData from '../../data/abhaFhirMock.json';
+import { API_BASE_URL } from '../../config/constants';
 
 // Helper function to format markdown text to HTML
 const formatMarkdown = (text) => {
@@ -61,9 +62,9 @@ function PatientDetailView({ patient, onBack }) {
       try {
         const patientData = abhaData[patient.abhaId]
         console.log('🔍 Generating summary for patient:', patient.name)
-        console.log('📤 Sending request to: http://localhost:3001/api/generate-patient-summary')
+        console.log('📤 Sending request to:', `${API_BASE_URL}/api/generate-patient-summary`)
         
-        const response = await fetch('http://localhost:3001/api/generate-patient-summary', {
+        const response = await fetch(`${API_BASE_URL}/api/generate-patient-summary`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -90,7 +91,7 @@ function PatientDetailView({ patient, onBack }) {
         const patientData = abhaData[patient.abhaId]
         console.log('🔍 Generating AI overview for patient:', patient.name)
         
-        const response = await fetch('http://localhost:3001/api/generate-patient-overview', {
+        const response = await fetch(`${API_BASE_URL}/api/generate-patient-overview`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -129,9 +130,9 @@ function PatientDetailView({ patient, onBack }) {
     try {
       const patientData = abhaData[patient.abhaId]
       console.log('💬 Sending chat message:', chatInput)
-      console.log('📤 Sending request to: http://localhost:3001/api/doctor-chat')
+      console.log('📤 Sending request to:', `${API_BASE_URL}/api/doctor-chat`)
       
-      const response = await fetch('http://localhost:3001/api/doctor-chat', {
+      const response = await fetch(`${API_BASE_URL}/api/doctor-chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

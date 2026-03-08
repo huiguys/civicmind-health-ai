@@ -5,7 +5,7 @@
 
 const pdfGeneratorService = require('../services/pdfGenerator/PDFGeneratorService');
 const pdfCache = require('../services/pdfCache');
-const abhaData = require('../../src/data/abhaFhirMock.json');
+const abhaData = require('../data/abhaFhirMock.json');
 const auditLogger = require('../services/auditLogger');
 
 /**
