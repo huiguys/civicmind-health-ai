@@ -1,6 +1,6 @@
 # CivicMind Health AI Platform
 
-> **📚 Documentation:** [System Architecture](./ARCHITECTURE.md) | [Future Roadmap](./FUTURE_ROADMAP.md) | [Deployment Guide](./DEPLOY.md)
+> **📚 Documentation:** [System Architecture](./ARCHITECTURE.md) | [Future Roadmap](./FUTURE_ROADMAP.md)
 
 > **🎓 Hackathon Project:** AI for Bharat Hackathon | **Status:** Prototype with Production-Ready Architecture
 
@@ -444,7 +444,7 @@ Explore detailed technical documentation:
 
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Complete system architecture, ABHA integration workflow, AWS security framework, and compliance details
 - **[FUTURE_ROADMAP.md](./FUTURE_ROADMAP.md)** - Future enhancements including hospital administration AI, doctor co-pilot features, and patient ecosystem innovations
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Comprehensive deployment guide for AWS, Vercel, and Netlify with security verification
+- **[DEPLOY.md](./DEPLOY.md)** - Step-by-step AWS deployment guide for developers
 
 ## 👥 Team
 
